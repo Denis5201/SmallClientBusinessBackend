@@ -39,7 +39,7 @@ namespace SmallClientBusiness.BL.Services
                 Id = worker.Id,
                 Email = worker.User.Email,
                 FullName = worker.User.UserName,
-                BirthDate = DateOnly.FromDateTime(worker.User.BirthDate),
+                BirthDate = DateOnly.FromDateTime(worker.User.BirthDate.ToLocalTime()),
                 Avatar = worker.User.Avatar,
                 PhoneNumber = worker.User.PhoneNumber,
                 IsSubscribing = worker.IsSubscribing
