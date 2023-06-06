@@ -5,7 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SmallClientBusiness.Common
+namespace SmallClientBusiness.Common.System
 {
     public class JwtConfigs
     {
