@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using SmallClientBusiness.Common;
+using SmallClientBusiness.BL.Services;
+using SmallClientBusiness.Common.Interfaces;
+using SmallClientBusiness.Common.System;
 using SmallClientBusiness.DAL;
 using SmallClientBusiness.DAL.Entities;
 using System;
@@ -36,6 +38,8 @@ namespace SmallClientBusiness.BL
 
         public static void ConfigureAppServices(this WebApplicationBuilder builder)
         {
+            builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IProfileService, ProfileService>();
         }
 
         public static async Task SeedRoles(IServiceProvider serviceProvider)
