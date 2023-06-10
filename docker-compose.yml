@@ -1,0 +1,18 @@
+version: '3.3'
+
+services:
+  database:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: beautich
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123Den
+  app:
+    build: .
+    ports:
+      - "10000:80"
+    environment:
+      ConnectionStrings: "DefaultConnection=Server=database;Port=5432;Database=beautich;Username=postgres;Password=123Den"
+      ASPNETCORE_ENVIRONMENT: Development
+    depends_on:
+      - database

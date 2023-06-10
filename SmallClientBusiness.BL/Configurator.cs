@@ -41,17 +41,5 @@ namespace SmallClientBusiness.BL
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IProfileService, ProfileService>();
         }
-
-        public static async Task SeedRoles(IServiceProvider serviceProvider)
-        {
-            using (var scope = serviceProvider.CreateScope())
-            {
-                RoleManager<IdentityRole<Guid>> roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
-                if (!await roleManager.RoleExistsAsync(AppRoles.Worker))
-                {
-                    await roleManager.CreateAsync(new IdentityRole<Guid>(AppRoles.Worker));
-                }
-            }
-        }
     }
 }
