@@ -12,8 +12,8 @@ using SmallClientBusiness.DAL;
 namespace SmallClientBusiness.DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20230606075632_init")]
-    partial class init
+    [Migration("20230610055300_BackInit")]
+    partial class BackInit
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

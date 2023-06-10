@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace SmallClientBusiness.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class BackInit : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

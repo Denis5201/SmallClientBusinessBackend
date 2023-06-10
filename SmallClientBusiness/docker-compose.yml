@@ -1,0 +1,11 @@
+version: '3.3'
+
+services:
+  database:
+    image: postgres:latest
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_DB: beautich
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123Den
