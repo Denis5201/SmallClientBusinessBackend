@@ -24,6 +24,8 @@ services:
       - database
     networks:
       - db-network
+    command:
+      - dotnet ef database update
 
 networks:
   db-network:
