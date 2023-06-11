@@ -17,6 +17,6 @@ namespace SmallClientBusiness.DAL.Entities
 
         public string? Avatar { get; set; }
 
-        public Worker Worker { get; set; }
+        public WorkerEntity WorkerEntity { get; set; }
     }
 }

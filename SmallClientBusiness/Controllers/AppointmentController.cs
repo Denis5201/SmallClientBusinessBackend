@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmallClientBusiness.Common.Dto;
+using SmallClientBusiness.Common.Enum;
 using SmallClientBusiness.Common.Interfaces;
 using SmallClientBusiness.Common.System;
 
@@ -12,7 +13,6 @@ namespace SmallClientBusiness.Controllers
     /// </summary>
     [Route("api/appointments")]
     [ApiController]
-    [Authorize(Roles = AppRoles.Worker)]
     public class AppointmentController: ControllerBase
     {
         private readonly IAppointmentService _appointmentService;
@@ -33,11 +33,11 @@ namespace SmallClientBusiness.Controllers
         [HttpGet("")]
         public async Task<ActionResult<List<Appointment>>> GetAppointments()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null)
-            {
-                return Forbid();
-            }
+            // var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // if (userId == null)
+            // {
+            //     return Forbid();
+            // }
 
             return Ok();
         }
@@ -60,20 +60,22 @@ namespace SmallClientBusiness.Controllers
 
             return Ok();
         }
-        
+
         /// <summary>
         /// Получение записей с фильтрацией
         /// </summary>
         /// <param name="selectedDay"></param>
+        /// <param name="endDate"></param>
         /// <param name="services"></param>
-        /// <param name="sortingForPrice"></param>
-        /// <param name="sortingForDate"></param>
+        /// <param name="startPrice"></param>
+        /// <param name="endPrice"></param>
+        /// <param name="startDate"></param>
         /// <returns></returns>
         [HttpGet("filters")]
         public async Task<ActionResult<List<Appointment>>> GetAppointmentsForSelectedDay(
             DateOnly? selectedDay,
-            Double? startPrice,
-            Double? endPrice,
+            double? startPrice,
+            double? endPrice,
             DateOnly? startDate,
             DateOnly? endDate,
             List<Service> services
@@ -87,6 +89,23 @@ namespace SmallClientBusiness.Controllers
         
             return Ok();
         }
+        
+        /// <summary>
+        /// Получение конкретной записи
+        /// </summary>
+        /// <param name="appointmentId"></param>
+        /// <returns></returns>
+        [HttpGet("{appointmentId:guid}")]
+        public async Task<ActionResult<List<Appointment>>> GetAppointment(Guid appointmentId)
+        {
+            // var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // if (userId == null)
+            // {
+            //     return Forbid();
+            // }
+
+            return Ok();
+        }
 
         /// <summary>
         /// Создание новой записи
@@ -96,16 +115,35 @@ namespace SmallClientBusiness.Controllers
         [HttpPost("")]
         public async Task<IActionResult> CreateAppointment(CreateAppointment model)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Forbid();
+            }
+            
+            return Ok();
+        }
+
+        /// <summary>
+        /// Редактирование информации о записи
+        /// </summary>
+        /// <param name="appointmentId"></param>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPut("{appointmentId:guid}")]
+        public async Task<IActionResult> EditAppointment(Guid appointmentId, EditAppointment model)
+        {
             return Ok();
         }
         
         /// <summary>
-        /// Редактирование информации о записи
+        /// Изменить статус записи
         /// </summary>
-        /// <param name="model"></param>
+        /// <param name="appointmentId"></param>
+        /// <param name="status"></param>
         /// <returns></returns>
-        [HttpPut("")]
-        public async Task<IActionResult> EditAppointment(EditAppointment model)
+        [HttpPut("{appointmentId:guid}")]
+        public async Task<IActionResult> EditAppointment(Guid appointmentId, StatusAppointment status)
         {
             return Ok();
         }
