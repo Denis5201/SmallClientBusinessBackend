@@ -1,8 +1,10 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmallClientBusiness.Common.Dto;
 using SmallClientBusiness.Common.Enum;
 using SmallClientBusiness.Common.Interfaces;
+using SmallClientBusiness.Common.System;
 
 namespace SmallClientBusiness.Controllers
 {
@@ -11,6 +13,7 @@ namespace SmallClientBusiness.Controllers
     /// </summary>
     [Route("api/appointments")]
     [ApiController]
+    [Authorize(Roles = AppRoles.Worker)]
     public class AppointmentController: ControllerBase
     {
         private readonly IAppointmentService _appointmentService;
