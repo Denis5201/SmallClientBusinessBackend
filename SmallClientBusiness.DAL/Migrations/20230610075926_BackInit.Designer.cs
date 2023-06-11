@@ -12,7 +12,7 @@ using SmallClientBusiness.DAL;
 namespace SmallClientBusiness.DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20230610055300_BackInit")]
+    [Migration("20230610075926_BackInit")]
     partial class BackInit
     {
         /// <inheritdoc />
