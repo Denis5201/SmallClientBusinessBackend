@@ -2,10 +2,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SmallClientBusiness.Common.Dto;
 
-public class Service
+public class EditService
 {
-    public Guid Id { get; set; }
-    
     [Required]
     [MinLength(1)]
     public string Name { get; set; }
