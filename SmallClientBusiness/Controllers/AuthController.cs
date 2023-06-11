@@ -7,7 +7,7 @@ using System.Security.Claims;
 namespace SmallClientBusiness.Controllers
 {
     /// <summary>
-    /// контроллер для аутентификации/регистрации
+    /// Контроллер для аутентификации/регистрации
     /// </summary>
     [Route("api/auth")]
     [ApiController]
@@ -16,7 +16,7 @@ namespace SmallClientBusiness.Controllers
         private readonly IAuthService _authService;
 
         /// <summary>
-        /// конструктор
+        /// Конструктор
         /// </summary>
         /// <param name="authService"></param>
         public AuthController(IAuthService authService)
@@ -25,7 +25,7 @@ namespace SmallClientBusiness.Controllers
         }
 
         /// <summary>
-        /// зарегистрировать пользователя
+        /// Зарегистрировать пользователя
         /// </summary>
         /// <param name="workerUser"></param>
         /// <returns></returns>
@@ -37,7 +37,7 @@ namespace SmallClientBusiness.Controllers
         }
 
         /// <summary>
-        /// залогинить пользователя
+        /// Залогинить пользователя
         /// </summary>
         /// <param name="loginCredentials"></param>
         /// <returns></returns>
@@ -53,7 +53,7 @@ namespace SmallClientBusiness.Controllers
         }
 
         /// <summary>
-        /// обновить access и refresh токены
+        /// Обновить access и refresh токены
         /// </summary>
         /// <param name="oldTokens"></param>
         /// <returns></returns>
@@ -69,7 +69,7 @@ namespace SmallClientBusiness.Controllers
         }
 
         /// <summary>
-        /// выйти из аккаунта
+        /// Выйти из системы
         /// </summary>
         /// <returns></returns>
         [HttpPost("logout")]

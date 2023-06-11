@@ -9,6 +9,9 @@ using System.Security.Claims;
 
 namespace SmallClientBusiness.Controllers
 {
+    /// <summary>
+    /// Контроллер для взаимодействия с аккаунтом пользователя
+    /// </summary>
     [Route("api/profile")]
     [ApiController]
     [Authorize(Roles = AppRoles.Worker)]
@@ -16,11 +19,19 @@ namespace SmallClientBusiness.Controllers
     {
         private readonly IProfileService _profileService;
 
+        /// <summary>
+        /// Конструктор
+        /// </summary>
+        /// <param name="profileService"></param>
         public ProfileController(IProfileService profileService)
         {
             _profileService = profileService;
         }
 
+        /// <summary>
+        /// Получение профиля работника
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("")]
         public async Task<ActionResult<WorkerProfile>> GetWorkerProfile()
         {
@@ -33,6 +44,11 @@ namespace SmallClientBusiness.Controllers
             return Ok(profile);
         }
 
+        /// <summary>
+        /// Изменить данные профиля
+        /// </summary>
+        /// <param name="changeUser"></param>
+        /// <returns></returns>
         [HttpPatch("")]
         public async Task<IActionResult> ChangeProfile(ChangeUser changeUser)
         {
@@ -50,6 +66,11 @@ namespace SmallClientBusiness.Controllers
             return Ok();
         }
 
+        /// <summary>
+        /// Изменить пароль
+        /// </summary>
+        /// <param name="changePassword"></param>
+        /// <returns></returns>
         [HttpPut("password")]
         public async Task<IActionResult> ChangePassword(ChangePassword changePassword)
         {
@@ -67,6 +88,11 @@ namespace SmallClientBusiness.Controllers
             return Ok();
         }
 
+        /// <summary>
+        /// Изменить статус подписки
+        /// </summary>
+        /// <param name="isSubscribing"></param>
+        /// <returns></returns>
         [HttpPut("subscribe")]
         public async Task<IActionResult> ChangeSubscribingStatus(bool isSubscribing)
         {
