@@ -40,6 +40,8 @@ namespace SmallClientBusiness.BL
         {
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IProfileService, ProfileService>();
+            builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+            builder.Services.AddScoped<IServiceService, ServiceService>();
         }
 
         public static async Task SeedRoles(IServiceProvider serviceProvider)

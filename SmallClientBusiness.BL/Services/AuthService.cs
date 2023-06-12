@@ -44,7 +44,7 @@ namespace SmallClientBusiness.BL.Services
                 UserName = createWorker.FullName,
                 BirthDate = createWorker.BirthDate.ToDateTime(TimeOnly.MinValue).ToUniversalTime(),
                 PhoneNumber = createWorker.PhoneNumber,
-                Worker = new Worker()
+                WorkerEntity = new WorkerEntity()
             };
 
             var result = await _userManager.CreateAsync(user, createWorker.Password);
