@@ -140,7 +140,7 @@ namespace SmallClientBusiness.Controllers
         /// <param name="appointmentId"></param>
         /// <param name="status"></param>
         /// <returns></returns>
-        [HttpPut("{appointmentId:guid}")]
+        [HttpPut("{appointmentId:guid}/status")]
         public async Task<IActionResult> ChangeStatus(Guid appointmentId, StatusAppointment status)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
