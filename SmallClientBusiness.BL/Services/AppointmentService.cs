@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using SmallClientBusiness.Common.Dto;
 using SmallClientBusiness.Common.Enum;
@@ -47,7 +48,7 @@ public class AppointmentService: IAppointmentService
         double? endPrice, 
         DateTime? startDate, 
         DateTime? endDate, 
-        List<Guid> servicesId,
+        List<Guid>? servicesId,
         int page
         )
     {
@@ -75,7 +76,8 @@ public class AppointmentService: IAppointmentService
 
         appointments = SortingAppointmentsForDate(startDate, endDate, appointments);
         appointments = SortingAppointmentsForPrice(startPrice, endPrice, appointments);
-        appointments = await SortingAppointmentsForServices(servicesId, appointments);
+        if (servicesId != null)
+            appointments = await SortingAppointmentsForServices(servicesId, appointments);
 
         const int pageSize = 5;
         var countDishes = appointments.Count;
@@ -298,7 +300,7 @@ public class AppointmentService: IAppointmentService
         return appointments;
     }
 
-    private async Task<List<Appointment>> SortingAppointmentsForServices(List<Guid> servicesId, List<Appointment> appointments)
+    private async Task<List<Appointment>> SortingAppointmentsForServices(List<Guid>? servicesId, List<Appointment> appointments)
     {
         var sortingAppointments = new List<Appointment>();
         foreach (var appointment in appointments)

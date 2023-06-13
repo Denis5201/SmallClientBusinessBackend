@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using SmallClientBusiness.Common.Dto;
 using SmallClientBusiness.Common.Enum;
 
@@ -13,7 +14,7 @@ public interface IAppointmentService
         double? endPrice,
         DateTime? startDate,
         DateTime? endDate,
-        List<Guid> servicesId,
+        List<Guid>? servicesId,
         int page
     );
 

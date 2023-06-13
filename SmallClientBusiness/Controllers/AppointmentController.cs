@@ -1,3 +1,5 @@
+using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -51,10 +53,10 @@ namespace SmallClientBusiness.Controllers
         /// Получение всех записей с фильтрацией
         /// </summary>
         /// <param name="endDate"></param>
-        /// <param name="services"></param>
         /// <param name="startPrice"></param>
         /// <param name="endPrice"></param>
         /// <param name="startDate"></param>
+        /// <param name="servicesId"></param>
         /// <param name="page"></param>
         /// <returns></returns>
         [HttpGet("filters")]
@@ -63,8 +65,8 @@ namespace SmallClientBusiness.Controllers
             double? endPrice,
             DateTime? startDate,
             DateTime? endDate,
-            List<Guid> services,
-            int page
+            [FromQuery] List<Guid>? servicesId,
+            [DefaultValue(1)] int page
         )
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -73,7 +75,7 @@ namespace SmallClientBusiness.Controllers
                 return Forbid();
             }
             
-            var appointments = await _appointmentService.GetAppointments(new Guid(userId), startPrice, endPrice, startDate, endDate, services, page);
+            var appointments = await _appointmentService.GetAppointments(new Guid(userId), startPrice, endPrice, startDate, endDate, servicesId, page);
 
             return Ok(appointments);
         }
