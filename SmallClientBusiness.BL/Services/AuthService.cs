@@ -87,7 +87,7 @@ namespace SmallClientBusiness.BL.Services
             }
 
             var user = await _userManager.FindByIdAsync(userId);
-            if (user == null || user.RefreshToken != oldTokens.RefreshaToken || user.RefreshTokenExpires <= DateTime.UtcNow)
+            if (user == null || user.RefreshToken != oldTokens.RefreshToken || user.RefreshTokenExpires <= DateTime.UtcNow)
             {
                 throw new IncorrectDataException("Неверный токен");
             }
@@ -129,7 +129,7 @@ namespace SmallClientBusiness.BL.Services
             return new TokenPair
             {
                 AccessToken = accessToken,
-                RefreshaToken = refreshToken
+                RefreshToken = refreshToken
             };
         }
     }

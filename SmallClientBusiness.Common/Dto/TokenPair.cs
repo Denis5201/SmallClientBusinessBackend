@@ -13,6 +13,6 @@ namespace SmallClientBusiness.Common.Dto
         public string AccessToken { get; set; }
 
         [Required]
-        public string RefreshaToken { get; set; }
+        public string RefreshToken { get; set; }
     }
 }
