@@ -1,0 +1,30 @@
+version: '3.3'
+
+services:
+  database:
+    container_name: "database"
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: beautich
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123Den
+    expose:
+      - "5432"
+    networks:
+      - db-network
+  app:
+    container_name: "app"
+    build: .
+    ports:
+      - "10000:80"
+    environment:
+      - "ConnectionStrings:DefaultConnection=Server=database;Port=5432;Database=beautich;Username=postgres;Password=123Den"
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - database
+    networks:
+      - db-network
+
+networks:
+  db-network:
+    driver: bridge
