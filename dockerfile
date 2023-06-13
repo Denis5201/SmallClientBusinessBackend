@@ -9,6 +9,7 @@ COPY ["SmallClientBusiness/SmallClientBusiness.csproj", "SmallClientBusiness/"]
 COPY ["SmallClientBusiness.BL/SmallClientBusiness.BL.csproj", "SmallClientBusiness.BL/"]
 COPY ["SmallClientBusiness.Common/SmallClientBusiness.Common.csproj", "SmallClientBusiness.Common/"]
 COPY ["SmallClientBusiness.DAL/SmallClientBusiness.DAL.csproj", "SmallClientBusiness.DAL/"]
+
 RUN dotnet restore "SmallClientBusiness/SmallClientBusiness.csproj"
 COPY . .
 WORKDIR "/src/SmallClientBusiness"
@@ -20,4 +21,5 @@ RUN dotnet publish "SmallClientBusiness.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
 ENTRYPOINT ["dotnet", "SmallClientBusiness.dll"]

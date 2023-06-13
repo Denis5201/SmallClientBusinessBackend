@@ -86,6 +86,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+Configurator.Migrate(app.Services);
 Configurator.SeedRoles(app.Services).Wait();
 
 app.Run();

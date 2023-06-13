@@ -44,6 +44,19 @@ namespace SmallClientBusiness.BL
             builder.Services.AddScoped<IAppointmentService, AppointmentService>();
             builder.Services.AddScoped<IServiceService, ServiceService>();
         }
+        
+        public static void Migrate(IServiceProvider serviceProvider)
+        {
+            using (var scope = serviceProvider.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                if (dbContext.Database.GetPendingMigrations().Any())
+                {
+                    dbContext.Database.Migrate();
+                }
+            }
+        }
 
         public static async Task SeedRoles(IServiceProvider serviceProvider)
         {
