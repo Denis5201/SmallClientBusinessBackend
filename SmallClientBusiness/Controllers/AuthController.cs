@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using SmallClientBusiness.Common.Dto;
 using SmallClientBusiness.Common.Interfaces;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using SmallClientBusiness.Common.System;
 
 namespace SmallClientBusiness.Controllers
 {
@@ -58,6 +60,7 @@ namespace SmallClientBusiness.Controllers
         /// <param name="oldTokens"></param>
         /// <returns></returns>
         [HttpPost("refresh")]
+        [Authorize]
         public async Task<ActionResult<TokenPair>> Refresh(TokenPair oldTokens)
         {
             if (!ModelState.IsValid)
@@ -73,6 +76,7 @@ namespace SmallClientBusiness.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost("logout")]
+        [Authorize]
         public async Task<IActionResult> Logout()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

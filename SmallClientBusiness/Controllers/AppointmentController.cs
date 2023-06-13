@@ -15,7 +15,6 @@ namespace SmallClientBusiness.Controllers
     /// </summary>
     [Route("api/appointments")]
     [ApiController]
-    [Authorize(Roles = AppRoles.Worker)]
     public class AppointmentController: ControllerBase
     {
         private readonly IAppointmentService _appointmentService;
@@ -36,6 +35,7 @@ namespace SmallClientBusiness.Controllers
         /// <param name="endDate"></param>
         /// <returns></returns>
         [HttpGet("timezone")]
+        [Authorize(Roles = AppRoles.Worker)]
         public async Task<ActionResult<List<Appointment>>> GetAppointments(DateTime startDate, DateTime endDate)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -60,6 +60,7 @@ namespace SmallClientBusiness.Controllers
         /// <param name="page"></param>
         /// <returns></returns>
         [HttpGet("filters")]
+        [Authorize(Roles = AppRoles.Worker)]
         public async Task<ActionResult<List<Appointment>>> GetAppointmentsForSelectedDay(
             double? startPrice,
             double? endPrice,
@@ -86,6 +87,7 @@ namespace SmallClientBusiness.Controllers
         /// <param name="appointmentId"></param>
         /// <returns></returns>
         [HttpGet("{appointmentId:guid}")]
+        [Authorize(Roles = AppRoles.Worker)]
         public async Task<ActionResult<List<Appointment>>> GetAppointment(Guid appointmentId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -105,6 +107,7 @@ namespace SmallClientBusiness.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost("")]
+        [Authorize(Roles = AppRoles.Worker)]
         public async Task<IActionResult> CreateAppointment(CreateAppointment model)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -124,6 +127,7 @@ namespace SmallClientBusiness.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPut("{appointmentId:guid}")]
+        [Authorize(Roles = AppRoles.Worker)]
         public async Task<IActionResult> EditAppointment(Guid appointmentId, EditAppointment model)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -143,6 +147,7 @@ namespace SmallClientBusiness.Controllers
         /// <param name="status"></param>
         /// <returns></returns>
         [HttpPut("{appointmentId:guid}/status")]
+        [Authorize(Roles = AppRoles.Worker)]
         public async Task<IActionResult> ChangeStatus(Guid appointmentId, StatusAppointment status)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

@@ -14,7 +14,6 @@ namespace SmallClientBusiness.Controllers
     /// </summary>
     [Route("api/profile")]
     [ApiController]
-    [Authorize(Roles = AppRoles.Worker)]
     public class ProfileController : ControllerBase
     {
         private readonly IProfileService _profileService;
@@ -33,6 +32,7 @@ namespace SmallClientBusiness.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("")]
+        [Authorize(Roles = AppRoles.Worker)]
         public async Task<ActionResult<WorkerProfile>> GetWorkerProfile()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -50,6 +50,7 @@ namespace SmallClientBusiness.Controllers
         /// <param name="changeUser"></param>
         /// <returns></returns>
         [HttpPatch("")]
+        [Authorize(Roles = AppRoles.Worker)]
         public async Task<IActionResult> ChangeProfile(ChangeUser changeUser)
         {
             if (!ModelState.IsValid)
@@ -72,6 +73,7 @@ namespace SmallClientBusiness.Controllers
         /// <param name="changePassword"></param>
         /// <returns></returns>
         [HttpPut("password")]
+        [Authorize(Roles = AppRoles.Worker)]
         public async Task<IActionResult> ChangePassword(ChangePassword changePassword)
         {
             if (!ModelState.IsValid)
@@ -94,6 +96,7 @@ namespace SmallClientBusiness.Controllers
         /// <param name="isSubscribing"></param>
         /// <returns></returns>
         [HttpPut("subscribe")]
+        [Authorize(Roles = AppRoles.Worker)]
         public async Task<IActionResult> ChangeSubscribingStatus(bool isSubscribing)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SmallClientBusiness.BL;
+using SmallClientBusiness.BL.Swagger;
 using SmallClientBusiness.Common.System;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +19,17 @@ builder.Services.AddSwaggerGen(options =>
         Title = "Beautich service", 
         Version = "v1"
     });
+    
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Please enter token",
+        Type = SecuritySchemeType.Http,
+        BearerFormat = "JWT",
+        Scheme = "Bearer"
+    });
+    
+    options.OperationFilter<AuthOperationFilter>();
     
     var filePath = Path.Combine(System.AppContext.BaseDirectory, "SmallClientBusiness.xml");
     options.IncludeXmlComments(filePath);

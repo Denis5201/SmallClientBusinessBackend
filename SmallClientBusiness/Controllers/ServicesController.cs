@@ -12,7 +12,6 @@ namespace SmallClientBusiness.Controllers
     /// </summary>
     [Route("api/services")]
     [ApiController]
-    [Authorize(Roles = AppRoles.Worker)]
     public class ServicesController: ControllerBase
     {
         private readonly IServiceService _serviceService;
@@ -31,6 +30,7 @@ namespace SmallClientBusiness.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("all")]
+        [Authorize(Roles = AppRoles.Worker)]
         public async Task<ActionResult<List<Service>>> GetServices()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -49,6 +49,7 @@ namespace SmallClientBusiness.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("default")]
+        [Authorize(Roles = AppRoles.Worker)]
         public async Task<ActionResult<List<Service>>> GetDefaultServices()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -67,6 +68,7 @@ namespace SmallClientBusiness.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("custom")]
+        [Authorize(Roles = AppRoles.Worker)]
         public async Task<ActionResult<List<Service>>> GetCustomServices()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -86,6 +88,7 @@ namespace SmallClientBusiness.Controllers
         /// <param name="serviceId"></param>
         /// <returns></returns>
         [HttpGet("{serviceId:guid}")]
+        [Authorize(Roles = AppRoles.Worker)]
         public async Task<ActionResult<List<Service>>> GetService(Guid serviceId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -105,6 +108,7 @@ namespace SmallClientBusiness.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost("")]
+        [Authorize(Roles = AppRoles.Worker)]
         public async Task<IActionResult> CreateService(CreateService model)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -125,6 +129,7 @@ namespace SmallClientBusiness.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPut("{serviceId:guid}")]
+        [Authorize(Roles = AppRoles.Worker)]
         public async Task<IActionResult> EditService(Guid serviceId, EditService model)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -144,6 +149,7 @@ namespace SmallClientBusiness.Controllers
         /// <param name="serviceId"></param>
         /// <returns></returns>
         [HttpDelete("{serviceId:guid}")]
+        [Authorize(Roles = AppRoles.Worker)]
         public async Task<IActionResult> DeleteService(Guid serviceId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
