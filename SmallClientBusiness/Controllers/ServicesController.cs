@@ -38,7 +38,7 @@ namespace SmallClientBusiness.Controllers
             {
                 return Forbid();
             }
-
+            
             var services = await _serviceService.GetServices(new Guid(userId));
             
             return Ok(services);
@@ -76,7 +76,7 @@ namespace SmallClientBusiness.Controllers
             {
                 return Forbid();
             }
-
+            
             var services = await _serviceService.GetCustomServices(new Guid(userId));
             
             return Ok(services);
@@ -96,7 +96,7 @@ namespace SmallClientBusiness.Controllers
             {
                 return Forbid();
             }
-
+            
             var services = await _serviceService.GetService(new Guid(userId), serviceId);
             
             return Ok(services);
@@ -116,7 +116,7 @@ namespace SmallClientBusiness.Controllers
             {
                 return Forbid();
             }
-
+            
             await _serviceService.CreateService(new Guid(userId), model);
             
             return Ok();
@@ -137,7 +137,7 @@ namespace SmallClientBusiness.Controllers
             {
                 return Forbid();
             }
-
+            
             await _serviceService.EditService(new Guid(userId), serviceId, model);
             
             return Ok();
@@ -157,7 +157,7 @@ namespace SmallClientBusiness.Controllers
             {
                 return Forbid();
             }
-
+            
             await _serviceService.DeleteService(new Guid(userId), serviceId);
             
             return Ok();
