@@ -137,6 +137,7 @@ public class AppointmentService: IAppointmentService
         {
             Id = Guid.NewGuid(),
             ClientName = model.ClientName,
+            ClientPhone = model.ClientPhone,
             WorkerId = workerId,
             StartDateTime = model.StartDateTime,
             Status = StatusAppointment.New,
@@ -152,6 +153,9 @@ public class AppointmentService: IAppointmentService
             {
                 throw new ItemNotFoundException($"Сервис с id = {serviceId} не найден");
             }
+
+            if (!worker.IsSubscribing && service.WorkerId == worker.Id)
+                throw new NoPermissionException($"Для добавления кастомной услуги с name = {service.Name} к записи необходима подписка. Проверьте наличие подписки и попробуйте снова");
 
             priceAppointment += service.Price;
             endDateTime += service.Duration.ToTimeSpan();
@@ -210,6 +214,9 @@ public class AppointmentService: IAppointmentService
                 throw new ItemNotFoundException($"Сервис с id = {serviceId} не найден");
             }
             
+            if (!worker.IsSubscribing && service.WorkerId == worker.Id)
+                throw new NoPermissionException($"Для добавления кастомной услуги с name = {service.Name} к записи необходима подписка. Проверьте наличие подписки и попробуйте снова");
+
             priceAppointment += service.Price;
             endDateTime += service.Duration.ToTimeSpan();
             
