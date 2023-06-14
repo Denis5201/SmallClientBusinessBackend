@@ -96,5 +96,17 @@ namespace SmallClientBusiness.BL.Services
 
             await _appDbContext.SaveChangesAsync();
         }
+
+        public async Task<bool> IsSubscribing(Guid userId)
+        {
+            var worker = await _appDbContext.Workers
+                .Where(x => x.Id == userId)
+                .FirstOrDefaultAsync();
+            
+            if (worker == null)
+                throw new ItemNotFoundException("Аккаунт не найден");
+
+            return worker.IsSubscribing;
+        }
     }
 }

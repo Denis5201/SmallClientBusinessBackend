@@ -89,6 +89,25 @@ namespace SmallClientBusiness.Controllers
             await _profileService.ChangePassword(userId, changePassword);
             return Ok();
         }
+        
+        /// <summary>
+        /// Проверить наличие подписки
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("subscribe")]
+        [Authorize(Roles = AppRoles.Worker)]
+        public async Task<ActionResult<bool>> IsSubscribing()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Forbid();
+            }
+
+            var isSubscribing = await _profileService.IsSubscribing(new Guid(userId));
+
+            return Ok(isSubscribing);
+        }
 
         /// <summary>
         /// Изменить статус подписки
