@@ -45,6 +45,12 @@ namespace SmallClientBusiness.Common.System
                 context.Response.StatusCode = StatusCodes.Status403Forbidden;
                 await context.Response.WriteAsJsonAsync(new ErrorResponse { Status = "403", Message = e.Message });
             }
+            catch (FailedLoadAvatarException e)
+            {
+                _logger.LogError(e.Message);
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                await context.Response.WriteAsJsonAsync(new ErrorResponse { Status = "400", Message = e.Message });
+            }
             catch (Exception e)
             {
                 _logger.LogError(e.ToString());
