@@ -132,6 +132,28 @@ namespace SmallClientBusiness.Controllers
         }
         
         /// <summary>
+        /// Получить аватар профиля
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("avatar")]
+        [Authorize]
+        public async Task<IActionResult> LoadAvatarPhoto()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Forbid();
+            }
+            
+            var path = _webHostEnvironment.WebRootPath + "/uploads/";
+            const string contentType = "image/png";
+
+            var imageBytes = await _profileService.LoadAvatar(new Guid(userId), path);
+            
+            return File(imageBytes, contentType);
+        }
+        
+        /// <summary>
         /// Загрузить аватар профиля
         /// </summary>
         /// <param name="avatarUpload"></param>
@@ -150,16 +172,16 @@ namespace SmallClientBusiness.Controllers
 
             await _profileService.UploadAvatar(new Guid(userId), avatarUpload, path);
 
-            return Ok("upload success");
+            return Ok("Upload avatar success");
         }
 
         /// <summary>
-        /// Получить аватар профиля
+        /// Удалить аватар профиля
         /// </summary>
         /// <returns></returns>
-        [HttpGet("avatar")]
+        [HttpDelete("avatar")]
         [Authorize]
-        public async Task<IActionResult> LoadAvatarPhoto()
+        public async Task<ActionResult<string>> DeleteAvatarPhoto()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null)
@@ -170,9 +192,9 @@ namespace SmallClientBusiness.Controllers
             var path = _webHostEnvironment.WebRootPath + "/uploads/";
             const string contentType = "image/png";
 
-            var imageBytes = await _profileService.LoadImage(new Guid(userId), path);
-            
-            return File(imageBytes, contentType);
+            await _profileService.DeleteAvatar(new Guid(userId), path);
+
+            return Ok("Deleted avatar success");
         }
     }
 }

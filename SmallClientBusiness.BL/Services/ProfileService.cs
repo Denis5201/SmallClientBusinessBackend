@@ -141,7 +141,7 @@ namespace SmallClientBusiness.BL.Services
             }
         }
 
-        public async Task<byte[]> LoadImage(Guid userId, string path)
+        public async Task<byte[]> LoadAvatar(Guid userId, string path)
         {
             var user = await _appDbContext.Users
                 .Where(x => x.Id == userId)
@@ -151,7 +151,7 @@ namespace SmallClientBusiness.BL.Services
                 throw new ItemNotFoundException("Аккаунт не найден");
 
             if (user.Avatar == null)
-                throw new ItemNotFoundException("У пользователя нет аватара");
+                throw new ItemNotFoundException("У пользователя еще нет аватара");
             
             var filePath = path + user.Id + ".png";
             
@@ -161,6 +161,28 @@ namespace SmallClientBusiness.BL.Services
             }
 
             return await File.ReadAllBytesAsync(filePath);
+        }
+
+        public async Task DeleteAvatar(Guid userId, string path)
+        {
+            var user = await _appDbContext.Users
+                .Where(x => x.Id == userId)
+                .FirstOrDefaultAsync();
+            
+            if (user == null)
+                throw new ItemNotFoundException("Аккаунт не найден");
+            
+            if (user.Avatar == null)
+                throw new ItemNotFoundException("У пользователя еще нет аватара");
+            
+            File.Delete(path + user.Id + ".png");
+            
+            user.Avatar = null;
+                
+            _appDbContext.Users.Attach(user);
+            _appDbContext.Entry(user).State = EntityState.Modified;
+
+            await _appDbContext.SaveChangesAsync();
         }
     }
 }
