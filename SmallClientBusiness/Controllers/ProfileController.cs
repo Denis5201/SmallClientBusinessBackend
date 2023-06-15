@@ -190,7 +190,6 @@ namespace SmallClientBusiness.Controllers
             }
             
             var path = _webHostEnvironment.WebRootPath + "/uploads/";
-            const string contentType = "image/png";
 
             await _profileService.DeleteAvatar(new Guid(userId), path);
 
