@@ -17,14 +17,16 @@ namespace SmallClientBusiness.Controllers
     public class ProfileController : ControllerBase
     {
         private readonly IProfileService _profileService;
+        public IWebHostEnvironment _webHostEnvironment;
 
         /// <summary>
         /// Конструктор
         /// </summary>
         /// <param name="profileService"></param>
-        public ProfileController(IProfileService profileService)
+        public ProfileController(IProfileService profileService, IWebHostEnvironment webHostEnvironment)
         {
             _profileService = profileService;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         /// <summary>
@@ -127,6 +129,50 @@ namespace SmallClientBusiness.Controllers
             await _profileService.SetSubscribingStatus(userId, isSubscribing);
 
             return Ok();
+        }
+        
+        /// <summary>
+        /// Загрузить аватар профиля
+        /// </summary>
+        /// <param name="avatarUpload"></param>
+        /// <returns></returns>
+        [HttpPost("avatar")]
+        [Authorize]
+        public async Task<ActionResult<string>> UploadAvatarPhoto([FromForm] AvatarUpload avatarUpload)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Forbid();
+            }
+            
+            var path = _webHostEnvironment.WebRootPath + "/uploads/";
+
+            await _profileService.UploadAvatar(new Guid(userId), avatarUpload, path);
+
+            return Ok("upload success");
+        }
+
+        /// <summary>
+        /// Получить аватар профиля
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("avatar")]
+        [Authorize]
+        public async Task<IActionResult> LoadAvatarPhoto()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Forbid();
+            }
+            
+            var path = _webHostEnvironment.WebRootPath + "/uploads/";
+            const string contentType = "image/png";
+
+            var imageBytes = await _profileService.LoadImage(new Guid(userId), path);
+            
+            return File(imageBytes, contentType);
         }
     }
 }

@@ -108,5 +108,59 @@ namespace SmallClientBusiness.BL.Services
 
             return worker.IsSubscribing;
         }
+
+        public async Task UploadAvatar(Guid userId, AvatarUpload avatarUpload, string path)
+        {
+            var user = await _appDbContext.Users
+                .Where(x => x.Id == userId)
+                .FirstOrDefaultAsync();
+            
+            if (user == null)
+                throw new ItemNotFoundException("Аккаунт не найден");
+
+            if (avatarUpload.avatar.Length == 0)
+                throw new FailedLoadAvatarException("Не удалось загрузить новую фотографию на аватар профиля");
+
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+            
+            if (!avatarUpload.avatar.FileName.Contains(".png"))
+                throw new IncorrectDataException("Необходимо прикрепить фотографию расширения png");
+            
+            await using (var fileStream = File.Create(path + user.Id + ".png"))
+            {
+                await avatarUpload.avatar.CopyToAsync(fileStream);
+                fileStream.Flush();
+                
+                user.Avatar = "avatar";
+                
+                _appDbContext.Users.Attach(user);
+                _appDbContext.Entry(user).State = EntityState.Modified;
+
+                await _appDbContext.SaveChangesAsync();
+            }
+        }
+
+        public async Task<byte[]> LoadImage(Guid userId, string path)
+        {
+            var user = await _appDbContext.Users
+                .Where(x => x.Id == userId)
+                .FirstOrDefaultAsync();
+            
+            if (user == null)
+                throw new ItemNotFoundException("Аккаунт не найден");
+
+            if (user.Avatar == null)
+                throw new ItemNotFoundException("У пользователя нет аватара");
+            
+            var filePath = path + user.Id + ".png";
+            
+            if (!File.Exists(filePath))
+            {
+                throw new ItemNotFoundException("Не удалось найти аватар профиля");
+            }
+
+            return await File.ReadAllBytesAsync(filePath);
+        }
     }
 }

@@ -18,5 +18,7 @@ namespace SmallClientBusiness.Common.Interfaces
         Task SetSubscribingStatus(string userId, bool isSubscribing);
 
         Task<bool> IsSubscribing(Guid userId);
+        Task UploadAvatar(Guid userId, AvatarUpload avatarUpload, string path);
+        Task<byte[]> LoadImage(Guid userId, string path);
     }
 }
