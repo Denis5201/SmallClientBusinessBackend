@@ -16,5 +16,7 @@ namespace SmallClientBusiness.Common.Interfaces
         Task ChangePassword(string userId, ChangePassword changePassword);
 
         Task SetSubscribingStatus(string userId, bool isSubscribing);
+
+        Task<bool> IsSubscribing(Guid userId);
     }
 }
