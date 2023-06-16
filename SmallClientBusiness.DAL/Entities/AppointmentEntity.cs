@@ -13,17 +13,15 @@ public class AppointmentEntity
     [Required]
     public string ClientName { get; set; }
     
+    [Phone]
+    public string? ClientPhone { get; set; }
+    
     [ForeignKey("WorkerEntity")]
     public Guid WorkerId { get; set; }
     
     [Required]
     public double Price { get; set; }
-    
-    [Required]
-    [Phone]
-    [MaybeNull]
-    public string ClientPhone { get; set; }
-    
+
     [Required]
     public DateTime StartDateTime { get; set; }
     
