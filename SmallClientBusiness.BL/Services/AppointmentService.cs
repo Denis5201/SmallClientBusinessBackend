@@ -48,7 +48,7 @@ public class AppointmentService: IAppointmentService
         double? endPrice, 
         DateTime? startDate, 
         DateTime? endDate, 
-        List<Guid>? servicesId,
+        List<Guid> servicesId,
         int page
         )
     {
@@ -76,7 +76,7 @@ public class AppointmentService: IAppointmentService
 
         appointments = SortingAppointmentsForDate(startDate, endDate, appointments);
         appointments = SortingAppointmentsForPrice(startPrice, endPrice, appointments);
-        if (servicesId != null)
+        if (servicesId.Any())
             appointments = await SortingAppointmentsForServices(servicesId, appointments);
 
         const int pageSize = 5;

@@ -66,7 +66,7 @@ namespace SmallClientBusiness.Controllers
             double? endPrice,
             DateTime? startDate,
             DateTime? endDate,
-            [FromQuery] List<Guid>? servicesId,
+            [FromQuery] List<Guid> servicesId,
             [DefaultValue(1)] int page
         )
         {
