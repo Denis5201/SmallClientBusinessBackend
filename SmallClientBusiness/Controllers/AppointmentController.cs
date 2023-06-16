@@ -50,7 +50,7 @@ namespace SmallClientBusiness.Controllers
         }
 
         /// <summary>
-        /// Получение всех записей с фильтрацией
+        /// Получение всех записей с фильтрацией и пагинацией
         /// </summary>
         /// <param name="endDate"></param>
         /// <param name="startPrice"></param>
@@ -59,7 +59,7 @@ namespace SmallClientBusiness.Controllers
         /// <param name="servicesId"></param>
         /// <param name="page"></param>
         /// <returns></returns>
-        [HttpGet("filters")]
+        [HttpGet("filters-pagination")]
         [Authorize(Roles = AppRoles.Worker)]
         public async Task<ActionResult<List<Appointment>>> GetAppointmentsForSelectedDay(
             double? startPrice,
@@ -77,6 +77,36 @@ namespace SmallClientBusiness.Controllers
             }
             
             var appointments = await _appointmentService.GetAppointments(new Guid(userId), startPrice, endPrice, startDate, endDate, servicesId, page);
+
+            return Ok(appointments);
+        }
+        
+        /// <summary>
+        /// Получение всех записей с фильтрацией
+        /// </summary>
+        /// <param name="endDate"></param>
+        /// <param name="startPrice"></param>
+        /// <param name="endPrice"></param>
+        /// <param name="startDate"></param>
+        /// <param name="servicesId"></param>
+        /// <returns></returns>
+        [HttpGet("filters")]
+        [Authorize(Roles = AppRoles.Worker)]
+        public async Task<ActionResult<List<Appointment>>> GetAppointmentsForSelectedDay(
+            double? startPrice,
+            double? endPrice,
+            DateTime? startDate,
+            DateTime? endDate,
+            [FromQuery] List<Guid> servicesId
+        )
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Forbid();
+            }
+            
+            var appointments = await _appointmentService.GetAppointments(new Guid(userId), startPrice, endPrice, startDate, endDate, servicesId);
 
             return Ok(appointments);
         }

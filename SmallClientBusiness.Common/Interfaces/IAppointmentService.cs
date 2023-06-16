@@ -17,6 +17,15 @@ public interface IAppointmentService
         List<Guid> servicesId,
         int page
     );
+    
+    Task<List<Appointment>> GetAppointments(
+        Guid workerId,
+        double? startPrice,
+        double? endPrice,
+        DateTime? startDate,
+        DateTime? endDate,
+        List<Guid> servicesId
+    );
 
     Task<Appointment> GetAppointment(Guid workerId, Guid appointmentId);
     

@@ -104,6 +104,34 @@ public class AppointmentService: IAppointmentService
         };
     }
 
+    public async Task<List<Appointment>> GetAppointments(Guid workerId, double? startPrice, double? endPrice, DateTime? startDate, DateTime? endDate,
+        List<Guid> servicesId)
+    {
+        var worker = await _context.Workers.FindAsync(workerId);
+        if (worker == null)
+            throw new ItemNotFoundException($"Не найден пользователь-работник с id = {workerId}");
+        
+        var appointments = await _context.Appointments
+            .Where(e => e.WorkerId == workerId)
+            .Select(e => new Appointment
+            {
+                Id = e.Id,
+                ClientName = e.ClientName,
+                Price = e.Price,
+                StartDateTime = e.StartDateTime,
+                EndDateTime = e.EndDateTime,
+                Status = e.Status
+            })
+            .ToListAsync();
+
+        appointments = SortingAppointmentsForDate(startDate, endDate, appointments);
+        appointments = SortingAppointmentsForPrice(startPrice, endPrice, appointments);
+        if (servicesId.Any())
+            appointments = await SortingAppointmentsForServices(servicesId, appointments);
+
+        return appointments;
+    }
+
     public async Task<Appointment> GetAppointment(Guid workerId, Guid appointmentId)
     {
         var worker = await _context.Workers.FindAsync(workerId);
