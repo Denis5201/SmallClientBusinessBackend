@@ -128,7 +128,7 @@ namespace SmallClientBusiness.Controllers
 
             var appointment = await _appointmentService.GetAppointment(new Guid(userId), appointmentId);
 
-            return Ok(appointmentId);
+            return Ok(appointment);
         }
 
         /// <summary>

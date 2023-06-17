@@ -21,9 +21,7 @@ namespace SmallClientBusiness.Common.Dto
         public string FullName { get; set; }
 
         [Required]
-        public DateOnly BirthDate { get; set; }
-
-        public string? Avatar { get; set; }
+        public bool Avatar { get; set; }
 
         [Phone]
         public string? PhoneNumber { get; set; }

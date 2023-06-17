@@ -86,7 +86,7 @@ public class ServiceService: IServiceService
         if (!worker.IsSubscribing && service.WorkerId == workerId)
             throw new NoPermissionException("У вас нет доступа для просмотра кастомной услуги. Проверьте наличие подписки");
 
-        if (service.WorkerId != workerId || service.WorkerId != null)
+        if (service.WorkerId != workerId || service.WorkerId == null)
             throw new NoPermissionException($"У вас нет доступа для просмотра услуги с id = {serviceId}");
         
         return new Service
