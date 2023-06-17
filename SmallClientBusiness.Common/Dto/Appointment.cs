@@ -11,7 +11,7 @@ public class Appointment
     public string ClientName { get; set; }
 
     [Required]
-    public List<string> Services { get; set; }
+    public List<ServiceShort> Services { get; set; }
     
     [Required]
     public double Price { get; set; }

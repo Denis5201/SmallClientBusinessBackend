@@ -39,7 +39,8 @@ public class AppointmentService: IAppointmentService
                 Id = e.Id,
                 ClientName = e.ClientName,
                 Price = e.Price,
-                Services = e.AppointmentServices.Select(s => s.Service.Name).ToList(),
+                Services = e.AppointmentServices
+                    .Select(s => new ServiceShort { Id = s.ServiceId, Name = s.Service.Name }).ToList(),
                 StartDateTime = e.StartDateTime,
                 EndDateTime = e.EndDateTime,
                 Status = e.Status
@@ -99,7 +100,8 @@ public class AppointmentService: IAppointmentService
                 Id = e.Id,
                 ClientName = e.ClientName,
                 Price = e.Price,
-                Services = e.AppointmentServices.Select(s => s.Service.Name).ToList(),
+                Services = e.AppointmentServices
+                    .Select(s => new ServiceShort { Id = s.ServiceId, Name = s.Service.Name } ).ToList(),
                 StartDateTime = e.StartDateTime,
                 EndDateTime = e.EndDateTime,
                 Status = e.Status
@@ -136,16 +138,15 @@ public class AppointmentService: IAppointmentService
         if (servicesId.Any())
         {
             appointments = appointments.Where(a => a.AppointmentServices.All(s => servicesId.Contains(s.ServiceId)));
-            //appointmentList = await SortingAppointmentsForServices(servicesId, appointmentList);
         }
-        //appointmentList = await AddNamesForAppointmentsServices(appointmentList);
 
         return await appointments.Select(e => new Appointment
             {
                 Id = e.Id,
                 ClientName = e.ClientName,
                 Price = e.Price,
-                Services = e.AppointmentServices.Select(s => s.Service.Name).ToList(),
+                Services = e.AppointmentServices
+                    .Select(s => new ServiceShort { Id = s.ServiceId, Name = s.Service.Name }).ToList(),
                 StartDateTime = e.StartDateTime,
                 EndDateTime = e.EndDateTime,
                 Status = e.Status
@@ -170,7 +171,8 @@ public class AppointmentService: IAppointmentService
             Id = appointment.Id,
             ClientName = appointment.ClientName,
             Price = appointment.Price,
-            Services = appointment.AppointmentServices.Select(s => s.Service.Name).ToList(),
+            Services = appointment.AppointmentServices
+                .Select(s => new ServiceShort { Id = s.ServiceId, Name = s.Service.Name }).ToList(),
             StartDateTime = appointment.StartDateTime,
             EndDateTime = appointment.EndDateTime,
             Status = appointment.Status
@@ -339,51 +341,4 @@ public class AppointmentService: IAppointmentService
 
         return appointments;
     }
-
-   /* private async Task<List<Appointment>> SortingAppointmentsForServices(List<Guid>? servicesId, List<Appointment> appointments)
-    {
-        var sortingAppointments = new List<Appointment>();
-        foreach (var appointment in appointments)
-        {
-            var appointmentsServices = await _context.AppointmentService
-                .Where(e => e.AppointmentId == appointment.Id && servicesId.Contains(e.ServiceId))
-                .ToListAsync();
-
-            foreach (var appointmentsService in appointmentsServices)
-            {
-                var newAppointment = await _context.Appointments
-                    .Where(e => e.Id == appointmentsService.AppointmentId)
-                    .Select(e => new Appointment
-                    {
-                        Id = e.Id,
-                        ClientName = e.ClientName,
-                        Price = e.Price,
-                        StartDateTime = e.StartDateTime,
-                        EndDateTime = e.EndDateTime,
-                        Status = e.Status
-                    })
-                    .FirstOrDefaultAsync();
-                
-                if (newAppointment != null)
-                    sortingAppointments.Add(newAppointment);
-                }
-        }
-
-        return sortingAppointments;
-    }
-
-    private async Task<List<Appointment>> AddNamesForAppointmentsServices(List<Appointment> appointments)
-    {
-        foreach (var appointment in appointments)
-        {
-            var services = await _context.AppointmentService
-                .Where(e => e.AppointmentId == appointment.Id)
-                .Include(s => s.Service)
-                .ToListAsync();
-
-            appointment.Services = services.Select(n => n.Service.Name).ToList();
-        }
-
-        return appointments;
-    }*/
 }
