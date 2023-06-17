@@ -53,7 +53,7 @@ namespace SmallClientBusiness.Common.System
             }
             catch (Exception e)
             {
-                _logger.LogError(e.InnerException.ToString());
+                _logger.LogError(e.Message);
                 context.Response.StatusCode = StatusCodes.Status500InternalServerError;
                 await context.Response.WriteAsJsonAsync(new ErrorResponse { Status = "500", Message = e.Message });
             }
