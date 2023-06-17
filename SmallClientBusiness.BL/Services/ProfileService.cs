@@ -39,7 +39,6 @@ namespace SmallClientBusiness.BL.Services
                 Id = worker.Id,
                 Email = worker.User.Email,
                 FullName = worker.User.UserName,
-                BirthDate = DateOnly.FromDateTime(worker.User.BirthDate.ToLocalTime()),
                 Avatar = worker.User.Avatar,
                 PhoneNumber = worker.User.PhoneNumber,
                 IsSubscribing = worker.IsSubscribing
@@ -48,10 +47,6 @@ namespace SmallClientBusiness.BL.Services
 
         public async Task ChangeProfile(string userId, ChangeUser changeUser)
         {
-            if (changeUser.BirthDate >= DateOnly.FromDateTime(DateTime.UtcNow))
-            {
-                throw new IncorrectDataException("Дата рождения должна быть меньше текущей");
-            }
 
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
@@ -59,9 +54,7 @@ namespace SmallClientBusiness.BL.Services
                 throw new ItemNotFoundException("Аккаунт не найден");
             }
 
-            user.Avatar = changeUser.Avatar;
             user.UserName = changeUser.FullName;
-            user.BirthDate = changeUser.BirthDate.ToDateTime(TimeOnly.MinValue).ToUniversalTime();
             user.PhoneNumber = changeUser.PhoneNumber;
 
             await _appDbContext.SaveChangesAsync();
@@ -132,7 +125,7 @@ namespace SmallClientBusiness.BL.Services
                 await avatarUpload.avatar.CopyToAsync(fileStream);
                 fileStream.Flush();
                 
-                user.Avatar = "avatar";
+                user.Avatar = true;
                 
                 _appDbContext.Users.Attach(user);
                 _appDbContext.Entry(user).State = EntityState.Modified;
@@ -150,7 +143,7 @@ namespace SmallClientBusiness.BL.Services
             if (user == null)
                 throw new ItemNotFoundException("Аккаунт не найден");
 
-            if (user.Avatar == null)
+            if (user.Avatar == false)
                 throw new ItemNotFoundException("У пользователя еще нет аватара");
             
             var filePath = path + user.Id + ".png";
@@ -172,12 +165,12 @@ namespace SmallClientBusiness.BL.Services
             if (user == null)
                 throw new ItemNotFoundException("Аккаунт не найден");
             
-            if (user.Avatar == null)
+            if (user.Avatar == false)
                 throw new ItemNotFoundException("У пользователя еще нет аватара");
             
             File.Delete(path + user.Id + ".png");
             
-            user.Avatar = null;
+            user.Avatar = false;
                 
             _appDbContext.Users.Attach(user);
             _appDbContext.Entry(user).State = EntityState.Modified;

@@ -27,11 +27,6 @@ namespace SmallClientBusiness.BL.Services
 
         public async Task<TokenPair> CreateWorker(CreateWorkerUser createWorker)
         {
-            if (createWorker.BirthDate >= DateOnly.FromDateTime(DateTime.UtcNow))
-            {
-                throw new IncorrectDataException("Дата рождения должна быть меньше текущей");
-            }
-
             var existingUser = await _userManager.FindByEmailAsync(createWorker.Email);
             if (existingUser != null)
             {
@@ -42,7 +37,6 @@ namespace SmallClientBusiness.BL.Services
             {
                 Email = createWorker.Email,
                 UserName = createWorker.FullName,
-                BirthDate = createWorker.BirthDate.ToDateTime(TimeOnly.MinValue).ToUniversalTime(),
                 PhoneNumber = createWorker.PhoneNumber,
                 WorkerEntity = new WorkerEntity()
             };

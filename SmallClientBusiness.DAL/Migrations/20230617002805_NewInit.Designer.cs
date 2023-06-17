@@ -12,8 +12,8 @@ using SmallClientBusiness.DAL;
 namespace SmallClientBusiness.DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20230616160939_SecondMigrations")]
-    partial class SecondMigrations
+    [Migration("20230617002805_NewInit")]
+    partial class NewInit
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -243,11 +243,8 @@ namespace SmallClientBusiness.DAL.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Avatar")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("BirthDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<bool>("Avatar")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()

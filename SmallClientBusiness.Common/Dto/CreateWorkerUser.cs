@@ -23,9 +23,6 @@ namespace SmallClientBusiness.Common.Dto
         [MinLength(6)]
         public string Password { get; set; }
 
-        [Required]
-        public DateOnly BirthDate { get; set; }
-
         [Phone]
         public string? PhoneNumber { get; set; }
     }
