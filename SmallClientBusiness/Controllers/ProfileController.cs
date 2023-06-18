@@ -91,46 +91,7 @@ namespace SmallClientBusiness.Controllers
             await _profileService.ChangePassword(userId, changePassword);
             return Ok();
         }
-        
-        /// <summary>
-        /// Проверить наличие подписки
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("subscribe")]
-        [Authorize(Roles = AppRoles.Worker)]
-        public async Task<ActionResult<bool>> IsSubscribing()
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null)
-            {
-                return Forbid();
-            }
 
-            var isSubscribing = await _profileService.IsSubscribing(new Guid(userId));
-
-            return Ok(isSubscribing);
-        }
-
-        /// <summary>
-        /// Изменить статус подписки
-        /// </summary>
-        /// <param name="isSubscribing"></param>
-        /// <returns></returns>
-        [HttpPut("subscribe")]
-        [Authorize(Roles = AppRoles.Worker)]
-        public async Task<IActionResult> ChangeSubscribingStatus(bool isSubscribing)
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null)
-            {
-                return Forbid();
-            }
-
-            await _profileService.SetSubscribingStatus(userId, isSubscribing);
-
-            return Ok();
-        }
-        
         /// <summary>
         /// Получить аватар профиля
         /// </summary>

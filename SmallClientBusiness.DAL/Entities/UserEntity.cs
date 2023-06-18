@@ -16,5 +16,7 @@ namespace SmallClientBusiness.DAL.Entities
         public bool Avatar { get; set; } = false;
 
         public WorkerEntity WorkerEntity { get; set; }
+        
+        public SubscribeEntity Subscribe { get; set; }
     }
 }
