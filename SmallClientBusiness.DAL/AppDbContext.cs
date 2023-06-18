@@ -12,6 +12,7 @@ namespace SmallClientBusiness.DAL
         public DbSet<AppointmentEntity> Appointments { get; set; }
         public DbSet<ServiceEntity> Services { get; set; }
         public DbSet<AppointmentServiceEntity> AppointmentService { get; set; }
+        public DbSet<SubscribeEntity> SubscribeEntities { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -22,6 +23,12 @@ namespace SmallClientBusiness.DAL
                 .HasOne(x => x.WorkerEntity)
                 .WithOne(x => x.User)
                 .HasForeignKey<WorkerEntity>(x => x.Id).IsRequired();
+            
+            builder.Entity<UserEntity>()
+                .HasOne(e => e.Subscribe)
+                .WithOne(e => e.User)
+                .HasForeignKey<SubscribeEntity>(e => e.UserId)
+                .IsRequired();
 
             builder.Entity<AppointmentServiceEntity>()
                 .HasKey(e => new {e.AppointmentId, e.ServiceId});

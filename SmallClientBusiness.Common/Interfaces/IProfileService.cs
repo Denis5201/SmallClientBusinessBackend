@@ -14,10 +14,7 @@ namespace SmallClientBusiness.Common.Interfaces
         Task ChangeProfile(string userId, ChangeUser changeWorker);
 
         Task ChangePassword(string userId, ChangePassword changePassword);
-
-        Task SetSubscribingStatus(string userId, bool isSubscribing);
-
-        Task<bool> IsSubscribing(Guid userId);
+        
         Task UploadAvatar(Guid userId, AvatarUpload avatarUpload, string path);
         Task<byte[]> LoadAvatar(Guid userId, string path);
         Task DeleteAvatar(Guid userId, string path);

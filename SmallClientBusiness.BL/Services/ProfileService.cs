@@ -75,33 +75,6 @@ namespace SmallClientBusiness.BL.Services
             }
         }
 
-        public async Task SetSubscribingStatus(string userId, bool isSubscribing)
-        {
-            var worker = await _appDbContext.Workers
-                .Where(x => x.Id == Guid.Parse(userId))
-                .FirstOrDefaultAsync();
-            if (worker == null)
-            {
-                throw new ItemNotFoundException("Аккаунт не найден");
-            }
-
-            worker.IsSubscribing = isSubscribing;
-
-            await _appDbContext.SaveChangesAsync();
-        }
-
-        public async Task<bool> IsSubscribing(Guid userId)
-        {
-            var worker = await _appDbContext.Workers
-                .Where(x => x.Id == userId)
-                .FirstOrDefaultAsync();
-            
-            if (worker == null)
-                throw new ItemNotFoundException("Аккаунт не найден");
-
-            return worker.IsSubscribing;
-        }
-
         public async Task UploadAvatar(Guid userId, AvatarUpload avatarUpload, string path)
         {
             var user = await _appDbContext.Users

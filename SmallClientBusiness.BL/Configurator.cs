@@ -43,6 +43,7 @@ namespace SmallClientBusiness.BL
             builder.Services.AddScoped<IProfileService, ProfileService>();
             builder.Services.AddScoped<IAppointmentService, AppointmentService>();
             builder.Services.AddScoped<IServiceService, ServiceService>();
+            builder.Services.AddScoped<ISubscribeService, SubscribeService>();
         }
         
         public static void Migrate(IServiceProvider serviceProvider)
@@ -50,7 +51,7 @@ namespace SmallClientBusiness.BL
             using (var scope = serviceProvider.CreateScope())
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
+                
                 if (dbContext.Database.GetPendingMigrations().Any())
                 {
                     dbContext.Database.Migrate();
