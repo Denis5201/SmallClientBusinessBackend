@@ -53,7 +53,7 @@ namespace SmallClientBusiness.Controllers
         /// <returns></returns>
         [HttpPatch("")]
         [Authorize(Roles = AppRoles.Worker)]
-        public async Task<IActionResult> ChangeProfile(ChangeUser changeUser)
+        public async Task<ActionResult<string>> ChangeProfile(ChangeUser changeUser)
         {
             if (!ModelState.IsValid)
             {
@@ -66,7 +66,7 @@ namespace SmallClientBusiness.Controllers
             }
 
             await _profileService.ChangeProfile(userId, changeUser);
-            return Ok();
+            return Ok("Success changed data profile");
         }
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace SmallClientBusiness.Controllers
         /// <returns></returns>
         [HttpPut("password")]
         [Authorize(Roles = AppRoles.Worker)]
-        public async Task<IActionResult> ChangePassword(ChangePassword changePassword)
+        public async Task<ActionResult<string>> ChangePassword(ChangePassword changePassword)
         {
             if (!ModelState.IsValid)
             {
@@ -89,7 +89,7 @@ namespace SmallClientBusiness.Controllers
             }
 
             await _profileService.ChangePassword(userId, changePassword);
-            return Ok();
+            return Ok("Success changed password");
         }
 
         /// <summary>

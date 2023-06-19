@@ -51,7 +51,7 @@ namespace SmallClientBusiness.Controllers
         /// <returns></returns>
         [HttpPut("")]
         [Authorize(Roles = AppRoles.Worker)]
-        public async Task<IActionResult> ChangeSubscribingStatus(bool isSubscribing)
+        public async Task<ActionResult<string>> ChangeSubscribingStatus(bool isSubscribing)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null)
@@ -61,7 +61,7 @@ namespace SmallClientBusiness.Controllers
 
             await _subscribeService.SetSubscribingStatus(userId, isSubscribing);
 
-            return Ok();
+            return Ok("Success");
         }
         
         /// <summary>

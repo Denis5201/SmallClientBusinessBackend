@@ -138,7 +138,7 @@ namespace SmallClientBusiness.Controllers
         /// <returns></returns>
         [HttpPost("")]
         [Authorize(Roles = AppRoles.Worker)]
-        public async Task<IActionResult> CreateAppointment(CreateAppointment model)
+        public async Task<ActionResult<string>> CreateAppointment(CreateAppointment model)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null)
@@ -147,7 +147,7 @@ namespace SmallClientBusiness.Controllers
             }
 
             await _appointmentService.CreateAppointment(new Guid(userId), model);
-            return Ok();
+            return Ok("Success created");
         }
 
         /// <summary>
@@ -158,7 +158,7 @@ namespace SmallClientBusiness.Controllers
         /// <returns></returns>
         [HttpPut("{appointmentId:guid}")]
         [Authorize(Roles = AppRoles.Worker)]
-        public async Task<IActionResult> EditAppointment(Guid appointmentId, EditAppointment model)
+        public async Task<ActionResult<string>> EditAppointment(Guid appointmentId, EditAppointment model)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null)
@@ -167,7 +167,7 @@ namespace SmallClientBusiness.Controllers
             }
 
             await _appointmentService.EditAppointment(new Guid(userId), appointmentId, model);
-            return Ok();
+            return Ok("Success edited");
         }
         
         /// <summary>
@@ -177,7 +177,7 @@ namespace SmallClientBusiness.Controllers
         /// <returns></returns>
         [HttpDelete("{appointmentId:guid}")]
         [Authorize(Roles = AppRoles.Worker)]
-        public async Task<IActionResult> DeleteAppointment(Guid appointmentId)
+        public async Task<ActionResult<string>> DeleteAppointment(Guid appointmentId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null)
@@ -186,7 +186,7 @@ namespace SmallClientBusiness.Controllers
             }
 
             await _appointmentService.DeleteAppointment(new Guid(userId), appointmentId);
-            return Ok();
+            return Ok("Success deleted");
         }
         
         /// <summary>
@@ -195,7 +195,7 @@ namespace SmallClientBusiness.Controllers
         /// <returns></returns>
         [HttpDelete]
         [Authorize(Roles = AppRoles.Worker)]
-        public async Task<IActionResult> DeleteAppointment()
+        public async Task<ActionResult<string>> DeleteAppointment()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null)
@@ -204,7 +204,7 @@ namespace SmallClientBusiness.Controllers
             }
 
             await _appointmentService.DeleteAllAppointments(new Guid(userId));
-            return Ok();
+            return Ok("Success deleted all appointments");
         }
         
         /// <summary>
@@ -215,7 +215,7 @@ namespace SmallClientBusiness.Controllers
         /// <returns></returns>
         [HttpPut("{appointmentId:guid}/status")]
         [Authorize(Roles = AppRoles.Worker)]
-        public async Task<IActionResult> ChangeStatus(Guid appointmentId, StatusAppointment status)
+        public async Task<ActionResult<string>> ChangeStatus(Guid appointmentId, StatusAppointment status)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null)
@@ -224,7 +224,7 @@ namespace SmallClientBusiness.Controllers
             }
 
             await _appointmentService.ChangeStatus(new Guid(userId), appointmentId, status);
-            return Ok();
+            return Ok("Success changed status");
         }
     }
 }
