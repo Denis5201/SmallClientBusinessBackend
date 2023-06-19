@@ -394,12 +394,12 @@ public class AppointmentService: IAppointmentService
     private async Task CheckSameTimeAppointment(Guid workerId, DateTime newAppointmentStartDateTime, DateTime newAppointmentEndDateTime)
     {
         var appointments = await _context.Appointments
-            .Where(a => a.WorkerId == workerId)
+            .Where(a => a.WorkerId == workerId && 
+                        newAppointmentStartDateTime < a.EndDateTime && 
+                        newAppointmentEndDateTime > a.StartDateTime)
             .ToListAsync();
 
-        foreach (var appointment in appointments
-                     .Where(appointment => newAppointmentStartDateTime < appointment.EndDateTime &&
-                                                                      newAppointmentEndDateTime > appointment.StartDateTime))
+        if (appointments.Any())
         {
             throw new IncorrectDataException($"Возникли временные конфликты. Во время новой записи у вас уже есть запись с клиентом {appointment.ClientName} в {appointment.StartDateTime} до {appointment.EndDateTime}");
         }
