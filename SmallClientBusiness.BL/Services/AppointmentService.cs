@@ -28,6 +28,9 @@ public class AppointmentService: IAppointmentService
         startDate = startDate?.ToUniversalTime();
         endDate = endDate?.ToUniversalTime();
 
+        startDate = startDate.ToUniversalTime();
+        endDate = endDate.ToUniversalTime();
+
         var appointments = _context.Appointments
             .Where(e => e.WorkerId == workerId);
 
@@ -369,7 +372,9 @@ public class AppointmentService: IAppointmentService
             appointments = appointments
                 .Where(appointment => appointment.StartDateTime <= endDate);
         }
-        
+
+        appointments = appointments.OrderBy(s => s.StartDateTime);
+
         return appointments;
     }
     
