@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 using SmallClientBusiness.Common.Enum;
 
 namespace SmallClientBusiness.DAL.Entities;
@@ -12,12 +13,15 @@ public class AppointmentEntity
     [Required]
     public string ClientName { get; set; }
     
+    [Phone]
+    public string? ClientPhone { get; set; }
+    
     [ForeignKey("WorkerEntity")]
     public Guid WorkerId { get; set; }
     
     [Required]
     public double Price { get; set; }
-    
+
     [Required]
     public DateTime StartDateTime { get; set; }
     

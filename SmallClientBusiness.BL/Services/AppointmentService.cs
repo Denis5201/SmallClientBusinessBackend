@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using SmallClientBusiness.Common.Dto;
 using SmallClientBusiness.Common.Enum;
@@ -18,28 +19,35 @@ public class AppointmentService: IAppointmentService
         _context = context;
     }
 
-    public async Task<List<Appointment>> GetAppointments(Guid workerId, DateTime startDate, DateTime endDate)
+    public async Task<List<Appointment>> GetAppointments(Guid workerId, DateTime? startDate, DateTime? endDate)
     {
         var worker = await _context.Workers.FindAsync(workerId);
         if (worker == null)
             throw new ItemNotFoundException($"Не найден пользователь-работник с id = {workerId}");
 
-        var appointments = await _context.Appointments
-            .Where(e => e.WorkerId == workerId)
+        var appointments = _context.Appointments
+            .Where(e => e.WorkerId == workerId);
+
+        appointments = SortingAppointmentsForDate(startDate, endDate, appointments);
+
+        appointments = appointments.Include(a => a.AppointmentServices)
+            .ThenInclude(s => s.Service);
+
+        var appointmentsList = await appointments
             .Select(e => new Appointment
             {
                 Id = e.Id,
                 ClientName = e.ClientName,
                 Price = e.Price,
+                Services = e.AppointmentServices
+                    .Select(s => new ServiceShort { Id = s.ServiceId, Name = s.Service.Name }).ToList(),
                 StartDateTime = e.StartDateTime,
                 EndDateTime = e.EndDateTime,
                 Status = e.Status
             })
             .ToListAsync();
 
-        appointments = SortingAppointmentsForDate(startDate, endDate, appointments);
-
-        return appointments;
+        return appointmentsList;
     }
 
     public async Task<AppointmentPagedList> GetAppointments(
@@ -48,7 +56,7 @@ public class AppointmentService: IAppointmentService
         double? endPrice, 
         DateTime? startDate, 
         DateTime? endDate, 
-        List<Guid>? servicesId,
+        List<Guid> servicesId,
         int page
         )
     {
@@ -61,26 +69,22 @@ public class AppointmentService: IAppointmentService
             throw new IncorrectDataException(message: "Page value must be greater than 0");
         }
 
-        var appointments = await _context.Appointments
-            .Where(e => e.WorkerId == workerId)
-            .Select(e => new Appointment
-            {
-                Id = e.Id,
-                ClientName = e.ClientName,
-                Price = e.Price,
-                StartDateTime = e.StartDateTime,
-                EndDateTime = e.EndDateTime,
-                Status = e.Status
-            })
-            .ToListAsync();
+        var appointments = _context.Appointments
+            .Where(e => e.WorkerId == workerId);
 
         appointments = SortingAppointmentsForDate(startDate, endDate, appointments);
         appointments = SortingAppointmentsForPrice(startPrice, endPrice, appointments);
-        if (servicesId != null)
-            appointments = await SortingAppointmentsForServices(servicesId, appointments);
+
+        appointments = appointments.Include(a => a.AppointmentServices)
+            .ThenInclude(s => s.Service);
+
+        if (servicesId.Any())
+        {
+            appointments = appointments.Where(a => a.AppointmentServices.All(s => servicesId.Contains(s.ServiceId)));
+        }
 
         const int pageSize = 5;
-        var countDishes = appointments.Count;
+        var countDishes = appointments.Count();
         var count = countDishes % pageSize < pageSize && countDishes % pageSize != 0 
             ? countDishes / 5 + 1 
             : countDishes / 5;
@@ -90,7 +94,19 @@ public class AppointmentService: IAppointmentService
             throw new ItemNotFoundException(message: "Invalid value for attribute page");
         }
 
-        var itemsAppointment = appointments.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+        var itemsAppointment = await appointments.Skip((page - 1) * pageSize).Take(pageSize)
+            .Select(e => new Appointment
+            {
+                Id = e.Id,
+                ClientName = e.ClientName,
+                Price = e.Price,
+                Services = e.AppointmentServices
+                    .Select(s => new ServiceShort { Id = s.ServiceId, Name = s.Service.Name } ).ToList(),
+                StartDateTime = e.StartDateTime,
+                EndDateTime = e.EndDateTime,
+                Status = e.Status
+            })
+            .ToListAsync();
 
         return new AppointmentPagedList
         {
@@ -104,13 +120,49 @@ public class AppointmentService: IAppointmentService
         };
     }
 
+    public async Task<List<Appointment>> GetAppointments(Guid workerId, double? startPrice, double? endPrice, DateTime? startDate, DateTime? endDate,
+        List<Guid> servicesId)
+    {
+        var worker = await _context.Workers.FindAsync(workerId);
+        if (worker == null)
+            throw new ItemNotFoundException($"Не найден пользователь-работник с id = {workerId}");
+        
+        var appointments = _context.Appointments
+            .Where(e => e.WorkerId == workerId);
+
+        appointments = SortingAppointmentsForDate(startDate, endDate, appointments);
+        appointments = SortingAppointmentsForPrice(startPrice, endPrice, appointments);
+
+        appointments = appointments.Include(a => a.AppointmentServices)
+            .ThenInclude(s => s.Service);
+        if (servicesId.Any())
+        {
+            appointments = appointments.Where(a => a.AppointmentServices.All(s => servicesId.Contains(s.ServiceId)));
+        }
+
+        return await appointments.Select(e => new Appointment
+            {
+                Id = e.Id,
+                ClientName = e.ClientName,
+                Price = e.Price,
+                Services = e.AppointmentServices
+                    .Select(s => new ServiceShort { Id = s.ServiceId, Name = s.Service.Name }).ToList(),
+                StartDateTime = e.StartDateTime,
+                EndDateTime = e.EndDateTime,
+                Status = e.Status
+            }).ToListAsync();
+    }
+
     public async Task<Appointment> GetAppointment(Guid workerId, Guid appointmentId)
     {
         var worker = await _context.Workers.FindAsync(workerId);
         if (worker == null)
             throw new ItemNotFoundException($"Не найден пользователь-работник с id = {workerId}");
 
-        var appointment = await _context.Appointments.FindAsync(appointmentId);
+        var appointment = await _context.Appointments.Where(a => a.Id == appointmentId)
+            .Include(a => a.AppointmentServices)
+            .ThenInclude(s => s.Service)
+            .FirstOrDefaultAsync();
         if (appointment == null)
             throw new ItemNotFoundException($"Не найдена запись с id = {appointmentId}");
 
@@ -119,6 +171,8 @@ public class AppointmentService: IAppointmentService
             Id = appointment.Id,
             ClientName = appointment.ClientName,
             Price = appointment.Price,
+            Services = appointment.AppointmentServices
+                .Select(s => new ServiceShort { Id = s.ServiceId, Name = s.Service.Name }).ToList(),
             StartDateTime = appointment.StartDateTime,
             EndDateTime = appointment.EndDateTime,
             Status = appointment.Status
@@ -127,16 +181,21 @@ public class AppointmentService: IAppointmentService
 
     public async Task CreateAppointment(Guid workerId, CreateAppointment model)
     {
+
+        if (model.StartDateTime < DateTime.UtcNow)
+            throw new IncorrectDataException("Дата начала новой записи должна быть больше нынешней");
+        
         var worker = await _context.Workers.FindAsync(workerId);
         if (worker == null)
             throw new ItemNotFoundException($"Не найден пользователь-работник с id = {workerId}");
 
         model.StartDateTime = model.StartDateTime.ToUniversalTime();
-        
+
         var appointment = new AppointmentEntity
         {
             Id = Guid.NewGuid(),
             ClientName = model.ClientName,
+            ClientPhone = model.ClientPhone,
             WorkerId = workerId,
             StartDateTime = model.StartDateTime,
             Status = StatusAppointment.New,
@@ -153,6 +212,9 @@ public class AppointmentService: IAppointmentService
                 throw new ItemNotFoundException($"Сервис с id = {serviceId} не найден");
             }
 
+            if (!worker.IsSubscribing && service.WorkerId == worker.Id)
+                throw new NoPermissionException($"Для добавления кастомной услуги с name = {service.Name} к записи необходима подписка. Проверьте наличие подписки и попробуйте снова");
+
             priceAppointment += service.Price;
             endDateTime += service.Duration.ToTimeSpan();
             
@@ -165,9 +227,8 @@ public class AppointmentService: IAppointmentService
             });
         }
 
-        appointment.AppointmentServices = await _context.AppointmentService
-            .Where(e => e.AppointmentId == appointment.Id)
-            .ToListAsync();
+        await CheckSameTimeAppointment(workerId, model.StartDateTime, endDateTime);
+
         appointment.EndDateTime = endDateTime;
         appointment.Price = priceAppointment;
 
@@ -184,6 +245,9 @@ public class AppointmentService: IAppointmentService
         var appointment = await _context.Appointments.FindAsync(appointmentId);
         if (appointment == null)
             throw new ItemNotFoundException($"Не найдена запись с id = {appointmentId}");
+        
+        if (appointment.WorkerId != workerId)
+            throw new NoPermissionException($"У вас нет доступа для изменения данной записи с id = {appointment.Id}");
         
         appointment = new AppointmentEntity
         {
@@ -210,6 +274,9 @@ public class AppointmentService: IAppointmentService
                 throw new ItemNotFoundException($"Сервис с id = {serviceId} не найден");
             }
             
+            if (!worker.IsSubscribing && service.WorkerId == worker.Id)
+                throw new NoPermissionException($"Для добавления кастомной услуги с name = {service.Name} к записи необходима подписка. Проверьте наличие подписки и попробуйте снова");
+
             priceAppointment += service.Price;
             endDateTime += service.Duration.ToTimeSpan();
             
@@ -233,7 +300,42 @@ public class AppointmentService: IAppointmentService
 
         await _context.SaveChangesAsync();
     }
-    
+
+    public async Task DeleteAppointment(Guid workerId, Guid appointmentId)
+    {
+        var worker = await _context.Workers.FindAsync(workerId);
+        if (worker == null)
+            throw new ItemNotFoundException($"Не найден пользователь-работник с id = {workerId}");
+
+        var appointment = await _context.Appointments.FindAsync(appointmentId);
+        if (appointment == null)
+            throw new ItemNotFoundException($"Не найдена запись с id = {appointmentId}");
+
+        if (appointment.WorkerId != workerId)
+            throw new NoPermissionException($"У вас нет доступа для удаления данной записи с id = {appointment.Id}");
+
+        _context.Appointments.Remove(appointment);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteAllAppointments(Guid workerId)
+    {
+        var worker = await _context.Workers.FindAsync(workerId);
+        if (worker == null)
+            throw new ItemNotFoundException($"Не найден пользователь-работник с id = {workerId}");
+
+        var appointments = await _context.Appointments
+            .Where(a => a.WorkerId == workerId)
+            .ToListAsync();
+
+        foreach (var appointment in appointments)
+        {
+            _context.Appointments.Remove(appointment);
+        }
+        
+        await _context.SaveChangesAsync();
+    }
+
     public async Task ChangeStatus(Guid workerId, Guid appointmentId, StatusAppointment status)
     {
         var worker = await _context.Workers.FindAsync(workerId);
@@ -252,83 +354,54 @@ public class AppointmentService: IAppointmentService
         await _context.SaveChangesAsync();
     }
 
-    private static List<Appointment> SortingAppointmentsForDate(DateTime? startDate, DateTime? endDate, List<Appointment> appointments)
+    private static IQueryable<AppointmentEntity> SortingAppointmentsForDate(DateTime? startDate, DateTime? endDate, IQueryable<AppointmentEntity> appointments)
     {
-        if (startDate != null && endDate == null)
+        startDate = startDate?.ToUniversalTime();
+        endDate = endDate?.ToUniversalTime();
+        
+        if (startDate != null )
         {
             appointments = appointments
-                .Where(appointment => appointment.StartDateTime >= startDate)
-                .ToList();
+                .Where(appointment => appointment.StartDateTime >= startDate);
         }
-        else if (startDate == null && endDate != null)
+        if (endDate != null)
         {
             appointments = appointments
-                .Where(appointment => appointment.StartDateTime <= endDate)
-                .ToList();
+                .Where(appointment => appointment.StartDateTime <= endDate);
         }
-        else if (startDate != null && endDate != null)
-        {
-            appointments = appointments
-                .Where(appointment => appointment.StartDateTime <= endDate && appointment.StartDateTime >= startDate)
-                .ToList();
-        }
+
+        appointments = appointments.OrderBy(s => s.StartDateTime);
 
         return appointments;
     }
     
-    private static List<Appointment> SortingAppointmentsForPrice(double? startPrice, double? endPrice, List<Appointment> appointments)
+    private static IQueryable<AppointmentEntity> SortingAppointmentsForPrice(double? startPrice, double? endPrice, IQueryable<AppointmentEntity> appointments)
     {
-        if (startPrice != null && endPrice == null)
+        if (startPrice != null)
         {
             appointments = appointments
-                .Where(appointment => appointment.Price >= startPrice)
-                .ToList();
+                .Where(appointment => appointment.Price >= startPrice);
         }
-        else if (startPrice == null && endPrice != null)
+        if (endPrice != null)
         {
             appointments = appointments
-                .Where(appointment => appointment.Price <= endPrice)
-                .ToList();
-        }
-        else if (startPrice != null && endPrice != null)
-        {
-            appointments = appointments
-                .Where(appointment => appointment.Price <= endPrice && appointment.Price >= startPrice)
-                .ToList();
+                .Where(appointment => appointment.Price <= endPrice);
         }
 
         return appointments;
     }
 
-    private async Task<List<Appointment>> SortingAppointmentsForServices(List<Guid>? servicesId, List<Appointment> appointments)
+    private async Task CheckSameTimeAppointment(Guid workerId, DateTime newAppointmentStartDateTime, DateTime newAppointmentEndDateTime)
     {
-        var sortingAppointments = new List<Appointment>();
-        foreach (var appointment in appointments)
+        var appointments = await _context.Appointments
+            .Where(a => a.WorkerId == workerId && 
+                        newAppointmentStartDateTime < a.EndDateTime && 
+                        newAppointmentEndDateTime > a.StartDateTime)
+            .ToListAsync();
+
+        if (appointments.Any())
         {
-            var appointmentsServices = await _context.AppointmentService
-                .Where(e => e.AppointmentId == appointment.Id && servicesId.Contains(e.ServiceId))
-                .ToListAsync();
-
-            foreach (var appointmentsService in appointmentsServices)
-            {
-                var newAppointment = await _context.Appointments
-                    .Where(e => e.Id == appointmentsService.AppointmentId)
-                    .Select(e => new Appointment
-                    {
-                        Id = e.Id,
-                        ClientName = e.ClientName,
-                        Price = e.Price,
-                        StartDateTime = e.StartDateTime,
-                        EndDateTime = e.EndDateTime,
-                        Status = e.Status
-                    })
-                    .FirstOrDefaultAsync();
-                
-                if (newAppointment != null)
-                    sortingAppointments.Add(newAppointment);
-            }
+            throw new IncorrectDataException($"Возникли временные конфликты. Во время новой записи у вас уже есть запись с клиентом {appointments.First().ClientName} в {appointments.First().StartDateTime} до {appointments.First().EndDateTime}");
         }
-
-        return sortingAppointments;
     }
 }

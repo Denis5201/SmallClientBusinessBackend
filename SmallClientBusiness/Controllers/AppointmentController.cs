@@ -36,7 +36,7 @@ namespace SmallClientBusiness.Controllers
         /// <returns></returns>
         [HttpGet("timezone")]
         [Authorize(Roles = AppRoles.Worker)]
-        public async Task<ActionResult<List<Appointment>>> GetAppointments(DateTime startDate, DateTime endDate)
+        public async Task<ActionResult<List<Appointment>>> GetAppointments(DateTime? startDate, DateTime? endDate)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null)
@@ -50,7 +50,7 @@ namespace SmallClientBusiness.Controllers
         }
 
         /// <summary>
-        /// Получение всех записей с фильтрацией
+        /// Получение всех записей с фильтрацией и пагинацией
         /// </summary>
         /// <param name="endDate"></param>
         /// <param name="startPrice"></param>
@@ -59,14 +59,14 @@ namespace SmallClientBusiness.Controllers
         /// <param name="servicesId"></param>
         /// <param name="page"></param>
         /// <returns></returns>
-        [HttpGet("filters")]
+        [HttpGet("filters-pagination")]
         [Authorize(Roles = AppRoles.Worker)]
         public async Task<ActionResult<List<Appointment>>> GetAppointmentsForSelectedDay(
             double? startPrice,
             double? endPrice,
             DateTime? startDate,
             DateTime? endDate,
-            [FromQuery] List<Guid>? servicesId,
+            [FromQuery] List<Guid> servicesId,
             [DefaultValue(1)] int page
         )
         {
@@ -77,6 +77,36 @@ namespace SmallClientBusiness.Controllers
             }
             
             var appointments = await _appointmentService.GetAppointments(new Guid(userId), startPrice, endPrice, startDate, endDate, servicesId, page);
+
+            return Ok(appointments);
+        }
+        
+        /// <summary>
+        /// Получение всех записей с фильтрацией
+        /// </summary>
+        /// <param name="endDate"></param>
+        /// <param name="startPrice"></param>
+        /// <param name="endPrice"></param>
+        /// <param name="startDate"></param>
+        /// <param name="servicesId"></param>
+        /// <returns></returns>
+        [HttpGet("filters")]
+        [Authorize(Roles = AppRoles.Worker)]
+        public async Task<ActionResult<List<Appointment>>> GetAppointmentsForSelectedDay(
+            double? startPrice,
+            double? endPrice,
+            DateTime? startDate,
+            DateTime? endDate,
+            [FromQuery] List<Guid> servicesId
+        )
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Forbid();
+            }
+            
+            var appointments = await _appointmentService.GetAppointments(new Guid(userId), startPrice, endPrice, startDate, endDate, servicesId);
 
             return Ok(appointments);
         }
@@ -98,7 +128,7 @@ namespace SmallClientBusiness.Controllers
 
             var appointment = await _appointmentService.GetAppointment(new Guid(userId), appointmentId);
 
-            return Ok(appointmentId);
+            return Ok(appointment);
         }
 
         /// <summary>
@@ -137,6 +167,43 @@ namespace SmallClientBusiness.Controllers
             }
 
             await _appointmentService.EditAppointment(new Guid(userId), appointmentId, model);
+            return Ok();
+        }
+        
+        /// <summary>
+        /// Удаление записи
+        /// </summary>
+        /// <param name="appointmentId"></param>
+        /// <returns></returns>
+        [HttpDelete("{appointmentId:guid}")]
+        [Authorize(Roles = AppRoles.Worker)]
+        public async Task<IActionResult> DeleteAppointment(Guid appointmentId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Forbid();
+            }
+
+            await _appointmentService.DeleteAppointment(new Guid(userId), appointmentId);
+            return Ok();
+        }
+        
+        /// <summary>
+        /// Удаление всех записей
+        /// </summary>
+        /// <returns></returns>
+        [HttpDelete]
+        [Authorize(Roles = AppRoles.Worker)]
+        public async Task<IActionResult> DeleteAppointment()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Forbid();
+            }
+
+            await _appointmentService.DeleteAllAppointments(new Guid(userId));
             return Ok();
         }
         

@@ -22,8 +22,8 @@ public class ServiceService: IServiceService
         if (worker == null)
             throw new ItemNotFoundException($"Не найден пользователь-работник с id = {workerId}");
 
-        return await _context.Services
-            .Where(e => e.WorkerId == null || e.WorkerId == workerId)
+        var services = await _context.Services
+            .Where(e => e.WorkerId == null || (e.WorkerId == workerId && worker.IsSubscribing))
             .Select(e => new Service
             {
                 Id = e.Id,
@@ -32,6 +32,8 @@ public class ServiceService: IServiceService
                 Duration = e.Duration
             })
             .ToListAsync();
+
+        return services;
     }
 
     public async Task<List<Service>> GetDefaultServices()
@@ -53,6 +55,9 @@ public class ServiceService: IServiceService
         var worker = await _context.Workers.FindAsync(workerId);
         if (worker == null)
             throw new ItemNotFoundException($"Не найден пользователь-работник с id = {workerId}");
+
+        if (!worker.IsSubscribing)
+            throw new NoPermissionException("У вас нет доступа для просмотра кастомных услуг. Проверьте наличие подписки");
         
         return await _context.Services
             .Where(e => e.WorkerId == workerId)
@@ -71,14 +76,17 @@ public class ServiceService: IServiceService
         var worker = await _context.Workers.FindAsync(workerId);
         if (worker == null)
             throw new ItemNotFoundException($"Не найден пользователь-работник с id = {workerId}");
-        
+
         var service = await _context.Services
             .Where(e => e.Id == serviceId)
             .FirstOrDefaultAsync();
         if (service == null)
             throw new ItemNotFoundException($"Не найдена услуга с id = {serviceId}");
+        
+        if (!worker.IsSubscribing && service.WorkerId == workerId)
+            throw new NoPermissionException("У вас нет доступа для просмотра кастомной услуги. Проверьте наличие подписки");
 
-        if (service.WorkerId != workerId || service.WorkerId != null)
+        if (service.WorkerId != workerId || service.WorkerId == null)
             throw new NoPermissionException($"У вас нет доступа для просмотра услуги с id = {serviceId}");
         
         return new Service
@@ -95,6 +103,9 @@ public class ServiceService: IServiceService
         var worker = await _context.Workers.FindAsync(workerId);
         if (worker == null)
             throw new ItemNotFoundException($"Не найден пользователь-работник с id = {workerId}");
+
+        if (!worker.IsSubscribing)
+            throw new NoPermissionException("Вы не можете создавать услугу, так как у вас отсутствует подписка");
 
         var service = new ServiceEntity
         {
@@ -114,6 +125,9 @@ public class ServiceService: IServiceService
         var worker = await _context.Workers.FindAsync(workerId);
         if (worker == null)
             throw new ItemNotFoundException($"Не найден пользователь-работник с id = {workerId}");
+        
+        if (!worker.IsSubscribing)
+            throw new NoPermissionException("Вы не можете изменять эту услугу, так как у вас отсутствует подписка");
 
         var service = await _context.Services.FindAsync(serviceId);
         if (service == null)
@@ -121,17 +135,12 @@ public class ServiceService: IServiceService
         
         if (service.WorkerId != workerId)
             throw new NoPermissionException($"У вас нет доступа для изменения услуги с id = {serviceId}");
-
-        service = new ServiceEntity
-        {
-            Id = service.Id,
-            WorkerId = service.WorkerId,
-            Name = model.Name,
-            Price = model.Price,
-            Duration = model.Duration,
-            Worker = worker
-        };
         
+
+        service.Name = model.Name;
+        service.Price = model.Price;
+        service.Duration = model.Duration;
+
         _context.Services.Attach(service);
         _context.Entry(service).State = EntityState.Modified;
 
@@ -143,6 +152,9 @@ public class ServiceService: IServiceService
         var worker = await _context.Workers.FindAsync(workerId);
         if (worker == null)
             throw new ItemNotFoundException($"Не найден пользователь-работник с id = {workerId}");
+        
+        if (!worker.IsSubscribing)
+            throw new NoPermissionException("Вы не можете удалить эту услугу, так как у вас отсутствует подписка");
         
         var service = await _context.Services.FindAsync(serviceId);
         if (service == null)

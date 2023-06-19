@@ -39,7 +39,6 @@ namespace SmallClientBusiness.BL.Services
                 Id = worker.Id,
                 Email = worker.User.Email,
                 FullName = worker.User.UserName,
-                BirthDate = DateOnly.FromDateTime(worker.User.BirthDate.ToLocalTime()),
                 Avatar = worker.User.Avatar,
                 PhoneNumber = worker.User.PhoneNumber,
                 IsSubscribing = worker.IsSubscribing
@@ -48,10 +47,6 @@ namespace SmallClientBusiness.BL.Services
 
         public async Task ChangeProfile(string userId, ChangeUser changeUser)
         {
-            if (changeUser.BirthDate >= DateOnly.FromDateTime(DateTime.UtcNow))
-            {
-                throw new IncorrectDataException("Дата рождения должна быть меньше текущей");
-            }
 
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
@@ -59,9 +54,7 @@ namespace SmallClientBusiness.BL.Services
                 throw new ItemNotFoundException("Аккаунт не найден");
             }
 
-            user.Avatar = changeUser.Avatar;
             user.UserName = changeUser.FullName;
-            user.BirthDate = changeUser.BirthDate.ToDateTime(TimeOnly.MinValue).ToUniversalTime();
             user.PhoneNumber = changeUser.PhoneNumber;
 
             await _appDbContext.SaveChangesAsync();
@@ -82,17 +75,78 @@ namespace SmallClientBusiness.BL.Services
             }
         }
 
-        public async Task SetSubscribingStatus(string userId, bool isSubscribing)
+        public async Task UploadAvatar(Guid userId, AvatarUpload avatarUpload, string path)
         {
-            var worker = await _appDbContext.Workers
-                .Where(x => x.Id == Guid.Parse(userId))
+            var user = await _appDbContext.Users
+                .Where(x => x.Id == userId)
                 .FirstOrDefaultAsync();
-            if (worker == null)
-            {
+            
+            if (user == null)
                 throw new ItemNotFoundException("Аккаунт не найден");
+
+            if (avatarUpload.avatar.Length == 0)
+                throw new FailedLoadAvatarException("Не удалось загрузить новую фотографию на аватар профиля");
+
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+            
+            if (!avatarUpload.avatar.FileName.Contains(".png"))
+                throw new IncorrectDataException("Необходимо прикрепить фотографию расширения png");
+            
+            await using (var fileStream = File.Create(path + user.Id + ".png"))
+            {
+                await avatarUpload.avatar.CopyToAsync(fileStream);
+                fileStream.Flush();
+                
+                user.Avatar = true;
+                
+                _appDbContext.Users.Attach(user);
+                _appDbContext.Entry(user).State = EntityState.Modified;
+
+                await _appDbContext.SaveChangesAsync();
+            }
+        }
+
+        public async Task<byte[]> LoadAvatar(Guid userId, string path)
+        {
+            var user = await _appDbContext.Users
+                .Where(x => x.Id == userId)
+                .FirstOrDefaultAsync();
+            
+            if (user == null)
+                throw new ItemNotFoundException("Аккаунт не найден");
+
+            if (user.Avatar == false)
+                throw new ItemNotFoundException("У пользователя еще нет аватара");
+            
+            var filePath = path + user.Id + ".png";
+            
+            if (!File.Exists(filePath))
+            {
+                throw new ItemNotFoundException("Не удалось найти аватар профиля");
             }
 
-            worker.IsSubscribing = isSubscribing;
+            return await File.ReadAllBytesAsync(filePath);
+        }
+
+        public async Task DeleteAvatar(Guid userId, string path)
+        {
+            var user = await _appDbContext.Users
+                .Where(x => x.Id == userId)
+                .FirstOrDefaultAsync();
+            
+            if (user == null)
+                throw new ItemNotFoundException("Аккаунт не найден");
+            
+            if (user.Avatar == false)
+                throw new ItemNotFoundException("У пользователя еще нет аватара");
+            
+            File.Delete(path + user.Id + ".png");
+            
+            user.Avatar = false;
+                
+            _appDbContext.Users.Attach(user);
+            _appDbContext.Entry(user).State = EntityState.Modified;
 
             await _appDbContext.SaveChangesAsync();
         }

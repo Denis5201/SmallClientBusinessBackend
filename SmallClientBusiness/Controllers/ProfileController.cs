@@ -17,14 +17,16 @@ namespace SmallClientBusiness.Controllers
     public class ProfileController : ControllerBase
     {
         private readonly IProfileService _profileService;
+        public IWebHostEnvironment _webHostEnvironment;
 
         /// <summary>
         /// Конструктор
         /// </summary>
         /// <param name="profileService"></param>
-        public ProfileController(IProfileService profileService)
+        public ProfileController(IProfileService profileService, IWebHostEnvironment webHostEnvironment)
         {
             _profileService = profileService;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         /// <summary>
@@ -91,23 +93,68 @@ namespace SmallClientBusiness.Controllers
         }
 
         /// <summary>
-        /// Изменить статус подписки
+        /// Получить аватар профиля
         /// </summary>
-        /// <param name="isSubscribing"></param>
         /// <returns></returns>
-        [HttpPut("subscribe")]
-        [Authorize(Roles = AppRoles.Worker)]
-        public async Task<IActionResult> ChangeSubscribingStatus(bool isSubscribing)
+        [HttpGet("avatar")]
+        [Authorize]
+        public async Task<IActionResult> LoadAvatarPhoto()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null)
             {
                 return Forbid();
             }
+            
+            var path = _webHostEnvironment.WebRootPath + "/uploads/";
+            const string contentType = "image/png";
 
-            await _profileService.SetSubscribingStatus(userId, isSubscribing);
+            var imageBytes = await _profileService.LoadAvatar(new Guid(userId), path);
+            
+            return File(imageBytes, contentType);
+        }
+        
+        /// <summary>
+        /// Загрузить аватар профиля
+        /// </summary>
+        /// <param name="avatarUpload"></param>
+        /// <returns></returns>
+        [HttpPost("avatar")]
+        [Authorize]
+        public async Task<ActionResult<string>> UploadAvatarPhoto([FromForm] AvatarUpload avatarUpload)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Forbid();
+            }
+            
+            var path = _webHostEnvironment.WebRootPath + "/uploads/";
 
-            return Ok();
+            await _profileService.UploadAvatar(new Guid(userId), avatarUpload, path);
+
+            return Ok("Upload avatar success");
+        }
+
+        /// <summary>
+        /// Удалить аватар профиля
+        /// </summary>
+        /// <returns></returns>
+        [HttpDelete("avatar")]
+        [Authorize]
+        public async Task<ActionResult<string>> DeleteAvatarPhoto()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Forbid();
+            }
+            
+            var path = _webHostEnvironment.WebRootPath + "/uploads/";
+
+            await _profileService.DeleteAvatar(new Guid(userId), path);
+
+            return Ok("Deleted avatar success");
         }
     }
 }

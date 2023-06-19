@@ -60,7 +60,6 @@ namespace SmallClientBusiness.Controllers
         /// <param name="oldTokens"></param>
         /// <returns></returns>
         [HttpPost("refresh")]
-        [Authorize]
         public async Task<ActionResult<TokenPair>> Refresh(TokenPair oldTokens)
         {
             if (!ModelState.IsValid)

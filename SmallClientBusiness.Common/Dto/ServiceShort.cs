@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace SmallClientBusiness.Common.Dto
 {
-    public class ChangeUser
+    public class ServiceShort
     {
         [Required]
-        [MinLength(1)]
-        public string FullName { get; set; }
+        public Guid Id { get; set; }
 
-        [Phone]
-        public string? PhoneNumber { get; set; }
+        [Required]
+        [MinLength(1)]
+        public string Name { get; set; }
     }
 }

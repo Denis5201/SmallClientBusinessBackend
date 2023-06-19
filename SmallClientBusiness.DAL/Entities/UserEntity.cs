@@ -9,14 +9,14 @@ namespace SmallClientBusiness.DAL.Entities
 {
     public class UserEntity : IdentityUser<Guid>
     {
-        public DateTime BirthDate { get; set; }
-
         public string? RefreshToken { get; set; }
 
         public DateTime? RefreshTokenExpires { get; set; }
 
-        public string? Avatar { get; set; }
+        public bool Avatar { get; set; } = false;
 
         public WorkerEntity WorkerEntity { get; set; }
+        
+        public SubscribeEntity Subscribe { get; set; }
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SmallClientBusiness.DAL;
@@ -11,9 +12,11 @@ using SmallClientBusiness.DAL;
 namespace SmallClientBusiness.DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230617002805_NewInit")]
+    partial class NewInit
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -229,77 +232,6 @@ namespace SmallClientBusiness.DAL.Migrations
                     b.HasIndex("WorkerId");
 
                     b.ToTable("Services");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("3f044dec-0643-43b8-a3da-3e8b7749d665"),
-                            Duration = new TimeOnly(1, 0, 0),
-                            Name = "Маникюр",
-                            Price = 1200.0
-                        },
-                        new
-                        {
-                            Id = new Guid("0cdb988c-4b9f-4713-805f-864a9c7563ac"),
-                            Duration = new TimeOnly(2, 0, 0),
-                            Name = "Наращивание ногтей",
-                            Price = 1000.0
-                        },
-                        new
-                        {
-                            Id = new Guid("d6450d0d-c6df-450a-9534-8f843ec73eb7"),
-                            Duration = new TimeOnly(0, 45, 0),
-                            Name = "Укладка волос",
-                            Price = 400.0
-                        },
-                        new
-                        {
-                            Id = new Guid("b1942411-2a3f-416b-bc3d-9f22090b02f5"),
-                            Duration = new TimeOnly(1, 15, 0),
-                            Name = "Окрашивание",
-                            Price = 2500.0
-                        },
-                        new
-                        {
-                            Id = new Guid("20a90b4c-ceaa-4ae5-8502-c20114425150"),
-                            Duration = new TimeOnly(0, 40, 0),
-                            Name = "Массаж",
-                            Price = 800.0
-                        },
-                        new
-                        {
-                            Id = new Guid("146ff8c8-b942-44ae-8e1e-cc658ec47bad"),
-                            Duration = new TimeOnly(0, 50, 0),
-                            Name = "Ламинирование бровей",
-                            Price = 600.0
-                        },
-                        new
-                        {
-                            Id = new Guid("fb767e25-05c7-4a10-bec8-08f669eb16d3"),
-                            Duration = new TimeOnly(1, 10, 0),
-                            Name = "Наращивание ресниц",
-                            Price = 1400.0
-                        });
-                });
-
-            modelBuilder.Entity("SmallClientBusiness.DAL.Entities.SubscribeEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("SubscribeEntities");
                 });
 
             modelBuilder.Entity("SmallClientBusiness.DAL.Entities.UserEntity", b =>
@@ -479,17 +411,6 @@ namespace SmallClientBusiness.DAL.Migrations
                     b.Navigation("Worker");
                 });
 
-            modelBuilder.Entity("SmallClientBusiness.DAL.Entities.SubscribeEntity", b =>
-                {
-                    b.HasOne("SmallClientBusiness.DAL.Entities.UserEntity", "User")
-                        .WithOne("Subscribe")
-                        .HasForeignKey("SmallClientBusiness.DAL.Entities.SubscribeEntity", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("SmallClientBusiness.DAL.Entities.WorkerEntity", b =>
                 {
                     b.HasOne("SmallClientBusiness.DAL.Entities.UserEntity", "User")
@@ -513,9 +434,6 @@ namespace SmallClientBusiness.DAL.Migrations
 
             modelBuilder.Entity("SmallClientBusiness.DAL.Entities.UserEntity", b =>
                 {
-                    b.Navigation("Subscribe")
-                        .IsRequired();
-
                     b.Navigation("WorkerEntity")
                         .IsRequired();
                 });
