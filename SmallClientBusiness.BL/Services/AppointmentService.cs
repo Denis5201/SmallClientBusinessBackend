@@ -19,14 +19,11 @@ public class AppointmentService: IAppointmentService
         _context = context;
     }
 
-    public async Task<List<Appointment>> GetAppointments(Guid workerId, DateTime startDate, DateTime endDate)
+    public async Task<List<Appointment>> GetAppointments(Guid workerId, DateTime? startDate, DateTime? endDate)
     {
         var worker = await _context.Workers.FindAsync(workerId);
         if (worker == null)
             throw new ItemNotFoundException($"Не найден пользователь-работник с id = {workerId}");
-
-        startDate = startDate.ToUniversalTime();
-        endDate = endDate.ToUniversalTime();
 
         var appointments = _context.Appointments
             .Where(e => e.WorkerId == workerId);
@@ -184,12 +181,16 @@ public class AppointmentService: IAppointmentService
 
     public async Task CreateAppointment(Guid workerId, CreateAppointment model)
     {
+
+        if (model.StartDateTime < DateTime.UtcNow)
+            throw new IncorrectDataException("Дата начала новой записи должна быть больше нынешней");
+        
         var worker = await _context.Workers.FindAsync(workerId);
         if (worker == null)
             throw new ItemNotFoundException($"Не найден пользователь-работник с id = {workerId}");
 
         model.StartDateTime = model.StartDateTime.ToUniversalTime();
-        
+
         var appointment = new AppointmentEntity
         {
             Id = Guid.NewGuid(),
@@ -226,6 +227,8 @@ public class AppointmentService: IAppointmentService
             });
         }
 
+        await CheckSameTimeAppointment(workerId, model.StartDateTime, endDateTime);
+
         appointment.EndDateTime = endDateTime;
         appointment.Price = priceAppointment;
 
@@ -242,6 +245,9 @@ public class AppointmentService: IAppointmentService
         var appointment = await _context.Appointments.FindAsync(appointmentId);
         if (appointment == null)
             throw new ItemNotFoundException($"Не найдена запись с id = {appointmentId}");
+        
+        if (appointment.WorkerId != workerId)
+            throw new NoPermissionException($"У вас нет доступа для изменения данной записи с id = {appointment.Id}");
         
         appointment = new AppointmentEntity
         {
@@ -294,7 +300,42 @@ public class AppointmentService: IAppointmentService
 
         await _context.SaveChangesAsync();
     }
-    
+
+    public async Task DeleteAppointment(Guid workerId, Guid appointmentId)
+    {
+        var worker = await _context.Workers.FindAsync(workerId);
+        if (worker == null)
+            throw new ItemNotFoundException($"Не найден пользователь-работник с id = {workerId}");
+
+        var appointment = await _context.Appointments.FindAsync(appointmentId);
+        if (appointment == null)
+            throw new ItemNotFoundException($"Не найдена запись с id = {appointmentId}");
+
+        if (appointment.WorkerId != workerId)
+            throw new NoPermissionException($"У вас нет доступа для удаления данной записи с id = {appointment.Id}");
+
+        _context.Appointments.Remove(appointment);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteAllAppointments(Guid workerId)
+    {
+        var worker = await _context.Workers.FindAsync(workerId);
+        if (worker == null)
+            throw new ItemNotFoundException($"Не найден пользователь-работник с id = {workerId}");
+
+        var appointments = await _context.Appointments
+            .Where(a => a.WorkerId == workerId)
+            .ToListAsync();
+
+        foreach (var appointment in appointments)
+        {
+            _context.Appointments.Remove(appointment);
+        }
+        
+        await _context.SaveChangesAsync();
+    }
+
     public async Task ChangeStatus(Guid workerId, Guid appointmentId, StatusAppointment status)
     {
         var worker = await _context.Workers.FindAsync(workerId);
@@ -315,6 +356,9 @@ public class AppointmentService: IAppointmentService
 
     private static IQueryable<AppointmentEntity> SortingAppointmentsForDate(DateTime? startDate, DateTime? endDate, IQueryable<AppointmentEntity> appointments)
     {
+        startDate = startDate?.ToUniversalTime();
+        endDate = endDate?.ToUniversalTime();
+        
         if (startDate != null )
         {
             appointments = appointments
@@ -345,5 +389,19 @@ public class AppointmentService: IAppointmentService
         }
 
         return appointments;
+    }
+
+    private async Task CheckSameTimeAppointment(Guid workerId, DateTime newAppointmentStartDateTime, DateTime newAppointmentEndDateTime)
+    {
+        var appointments = await _context.Appointments
+            .Where(a => a.WorkerId == workerId && 
+                        newAppointmentStartDateTime < a.EndDateTime && 
+                        newAppointmentEndDateTime > a.StartDateTime)
+            .ToListAsync();
+
+        if (appointments.Any())
+        {
+            throw new IncorrectDataException($"Возникли временные конфликты. Во время новой записи у вас уже есть запись с клиентом {appointments.First().ClientName} в {appointments.First().StartDateTime} до {appointments.First().EndDateTime}");
+        }
     }
 }

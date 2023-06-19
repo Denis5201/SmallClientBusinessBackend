@@ -6,7 +6,7 @@ namespace SmallClientBusiness.Common.Interfaces;
 
 public interface IAppointmentService
 {
-    Task<List<Appointment>> GetAppointments(Guid workerId, DateTime startDate, DateTime endDate);
+    Task<List<Appointment>> GetAppointments(Guid workerId, DateTime? startDate, DateTime? endDate);
 
     Task<AppointmentPagedList> GetAppointments(
         Guid workerId,
@@ -31,6 +31,8 @@ public interface IAppointmentService
     
     Task CreateAppointment(Guid workerId, CreateAppointment model);
     Task EditAppointment(Guid workerId, Guid appointmentId, EditAppointment model);
+    Task DeleteAppointment(Guid workerId, Guid appointmentId);
+    Task DeleteAllAppointments(Guid workerId);
     
     Task ChangeStatus(Guid workerId, Guid appointmentId, StatusAppointment status);
 }
