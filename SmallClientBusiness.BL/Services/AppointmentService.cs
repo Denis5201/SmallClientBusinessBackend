@@ -341,4 +341,12 @@ public class AppointmentService: IAppointmentService
 
         return appointments;
     }
+
+    private async Task<bool> CheckSameTimeAppointment(DateTime newAppointmentStartDateTime, DateTime newAppointmentEndDateTime)
+    {
+        var appointments = await _context.Appointments.ToListAsync();
+
+        return appointments.Any(appointment => newAppointmentStartDateTime < appointment.EndDateTime && 
+                                               newAppointmentEndDateTime > appointment.StartDateTime) && false;
+    }
 }
