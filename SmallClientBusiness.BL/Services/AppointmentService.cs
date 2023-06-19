@@ -401,7 +401,7 @@ public class AppointmentService: IAppointmentService
 
         if (appointments.Any())
         {
-            throw new IncorrectDataException($"Возникли временные конфликты. Во время новой записи у вас уже есть запись с клиентом {appointment.ClientName} в {appointment.StartDateTime} до {appointment.EndDateTime}");
+            throw new IncorrectDataException($"Возникли временные конфликты. Во время новой записи у вас уже есть запись с клиентом {appointments.First().ClientName} в {appointments.First().StartDateTime} до {appointments.First().EndDateTime}");
         }
     }
 }
