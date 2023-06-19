@@ -118,7 +118,7 @@ namespace SmallClientBusiness.Controllers
         /// <returns></returns>
         [HttpGet("{appointmentId:guid}")]
         [Authorize(Roles = AppRoles.Worker)]
-        public async Task<ActionResult<List<Appointment>>> GetAppointment(Guid appointmentId)
+        public async Task<ActionResult<Appointment>> GetAppointment(Guid appointmentId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null)
