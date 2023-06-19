@@ -24,12 +24,6 @@ public class AppointmentService: IAppointmentService
         var worker = await _context.Workers.FindAsync(workerId);
         if (worker == null)
             throw new ItemNotFoundException($"Не найден пользователь-работник с id = {workerId}");
-        
-        startDate = startDate?.ToUniversalTime();
-        endDate = endDate?.ToUniversalTime();
-
-        startDate = startDate.ToUniversalTime();
-        endDate = endDate.ToUniversalTime();
 
         var appointments = _context.Appointments
             .Where(e => e.WorkerId == workerId);
@@ -362,6 +356,9 @@ public class AppointmentService: IAppointmentService
 
     private static IQueryable<AppointmentEntity> SortingAppointmentsForDate(DateTime? startDate, DateTime? endDate, IQueryable<AppointmentEntity> appointments)
     {
+        startDate = startDate?.ToUniversalTime();
+        endDate = endDate?.ToUniversalTime();
+        
         if (startDate != null )
         {
             appointments = appointments
@@ -396,12 +393,13 @@ public class AppointmentService: IAppointmentService
 
     private async Task CheckSameTimeAppointment(Guid workerId, DateTime newAppointmentStartDateTime, DateTime newAppointmentEndDateTime)
     {
-        var appointments = await _context.Appointments.ToListAsync();
+        var appointments = await _context.Appointments
+            .Where(a => a.WorkerId == workerId)
+            .ToListAsync();
 
         foreach (var appointment in appointments
                      .Where(appointment => newAppointmentStartDateTime < appointment.EndDateTime &&
-                                                                      newAppointmentEndDateTime > appointment.StartDateTime && 
-                                                                      appointment.WorkerId == workerId))
+                                                                      newAppointmentEndDateTime > appointment.StartDateTime))
         {
             throw new IncorrectDataException($"Возникли временные конфликты. Во время новой записи у вас уже есть запись с клиентом {appointment.ClientName} в {appointment.StartDateTime} до {appointment.EndDateTime}");
         }
