@@ -181,12 +181,16 @@ public class AppointmentService: IAppointmentService
 
     public async Task CreateAppointment(Guid workerId, CreateAppointment model)
     {
+
+        if (model.StartDateTime < DateTime.UtcNow)
+            throw new IncorrectDataException("Дата начала новой записи должна быть больше нынешней");
+        
         var worker = await _context.Workers.FindAsync(workerId);
         if (worker == null)
             throw new ItemNotFoundException($"Не найден пользователь-работник с id = {workerId}");
 
         model.StartDateTime = model.StartDateTime.ToUniversalTime();
-        
+
         var appointment = new AppointmentEntity
         {
             Id = Guid.NewGuid(),
@@ -222,6 +226,8 @@ public class AppointmentService: IAppointmentService
                 Service = service
             });
         }
+
+        await CheckSameTimeAppointment(workerId, model.StartDateTime, endDateTime);
 
         appointment.EndDateTime = endDateTime;
         appointment.Price = priceAppointment;
@@ -342,11 +348,16 @@ public class AppointmentService: IAppointmentService
         return appointments;
     }
 
-    private async Task<bool> CheckSameTimeAppointment(DateTime newAppointmentStartDateTime, DateTime newAppointmentEndDateTime)
+    private async Task CheckSameTimeAppointment(Guid workerId, DateTime newAppointmentStartDateTime, DateTime newAppointmentEndDateTime)
     {
         var appointments = await _context.Appointments.ToListAsync();
 
-        return appointments.Any(appointment => newAppointmentStartDateTime < appointment.EndDateTime && 
-                                               newAppointmentEndDateTime > appointment.StartDateTime) && false;
+        foreach (var appointment in appointments
+                     .Where(appointment => newAppointmentStartDateTime < appointment.EndDateTime &&
+                                                                      newAppointmentEndDateTime > appointment.StartDateTime && 
+                                                                      appointment.WorkerId == workerId))
+        {
+            throw new IncorrectDataException($"Возникли временные конфликты. Во время новой записи у вас уже есть запись с клиентом {appointment.ClientName} в {appointment.StartDateTime} до {appointment.EndDateTime}");
+        }
     }
 }
