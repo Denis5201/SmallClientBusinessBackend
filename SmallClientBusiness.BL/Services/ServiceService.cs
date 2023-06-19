@@ -135,17 +135,12 @@ public class ServiceService: IServiceService
         
         if (service.WorkerId != workerId)
             throw new NoPermissionException($"У вас нет доступа для изменения услуги с id = {serviceId}");
-
-        service = new ServiceEntity
-        {
-            Id = service.Id,
-            WorkerId = service.WorkerId,
-            Name = model.Name,
-            Price = model.Price,
-            Duration = model.Duration,
-            Worker = worker
-        };
         
+
+        service.Name = model.Name;
+        service.Price = model.Price;
+        service.Duration = model.Duration;
+
         _context.Services.Attach(service);
         _context.Entry(service).State = EntityState.Modified;
 
