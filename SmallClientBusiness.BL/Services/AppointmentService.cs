@@ -246,6 +246,9 @@ public class AppointmentService: IAppointmentService
         if (appointment == null)
             throw new ItemNotFoundException($"Не найдена запись с id = {appointmentId}");
         
+        if (appointment.WorkerId != workerId)
+            throw new NoPermissionException($"У вас нет доступа для изменения данной записи с id = {appointment.Id}");
+        
         appointment = new AppointmentEntity
         {
             Id = appointment.Id,
@@ -297,7 +300,42 @@ public class AppointmentService: IAppointmentService
 
         await _context.SaveChangesAsync();
     }
-    
+
+    public async Task DeleteAppointment(Guid workerId, Guid appointmentId)
+    {
+        var worker = await _context.Workers.FindAsync(workerId);
+        if (worker == null)
+            throw new ItemNotFoundException($"Не найден пользователь-работник с id = {workerId}");
+
+        var appointment = await _context.Appointments.FindAsync(appointmentId);
+        if (appointment == null)
+            throw new ItemNotFoundException($"Не найдена запись с id = {appointmentId}");
+
+        if (appointment.WorkerId != workerId)
+            throw new NoPermissionException($"У вас нет доступа для удаления данной записи с id = {appointment.Id}");
+
+        _context.Appointments.Remove(appointment);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteAllAppointments(Guid workerId)
+    {
+        var worker = await _context.Workers.FindAsync(workerId);
+        if (worker == null)
+            throw new ItemNotFoundException($"Не найден пользователь-работник с id = {workerId}");
+
+        var appointments = await _context.Appointments
+            .Where(a => a.WorkerId == workerId)
+            .ToListAsync();
+
+        foreach (var appointment in appointments)
+        {
+            _context.Appointments.Remove(appointment);
+        }
+        
+        await _context.SaveChangesAsync();
+    }
+
     public async Task ChangeStatus(Guid workerId, Guid appointmentId, StatusAppointment status)
     {
         var worker = await _context.Workers.FindAsync(workerId);

@@ -171,6 +171,43 @@ namespace SmallClientBusiness.Controllers
         }
         
         /// <summary>
+        /// Удаление записи
+        /// </summary>
+        /// <param name="appointmentId"></param>
+        /// <returns></returns>
+        [HttpDelete("{appointmentId:guid}")]
+        [Authorize(Roles = AppRoles.Worker)]
+        public async Task<IActionResult> DeleteAppointment(Guid appointmentId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Forbid();
+            }
+
+            await _appointmentService.DeleteAppointment(new Guid(userId), appointmentId);
+            return Ok();
+        }
+        
+        /// <summary>
+        /// Удаление всех записей
+        /// </summary>
+        /// <returns></returns>
+        [HttpDelete]
+        [Authorize(Roles = AppRoles.Worker)]
+        public async Task<IActionResult> DeleteAppointment()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Forbid();
+            }
+
+            await _appointmentService.DeleteAllAppointments(new Guid(userId));
+            return Ok();
+        }
+        
+        /// <summary>
         /// Изменить статус записи
         /// </summary>
         /// <param name="appointmentId"></param>
