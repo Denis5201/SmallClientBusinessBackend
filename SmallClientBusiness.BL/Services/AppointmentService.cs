@@ -19,11 +19,14 @@ public class AppointmentService: IAppointmentService
         _context = context;
     }
 
-    public async Task<List<Appointment>> GetAppointments(Guid workerId, DateTime startDate, DateTime endDate)
+    public async Task<List<Appointment>> GetAppointments(Guid workerId, DateTime? startDate, DateTime? endDate)
     {
         var worker = await _context.Workers.FindAsync(workerId);
         if (worker == null)
             throw new ItemNotFoundException($"Не найден пользователь-работник с id = {workerId}");
+        
+        startDate = startDate?.ToUniversalTime();
+        endDate = endDate?.ToUniversalTime();
 
         var appointments = _context.Appointments
             .Where(e => e.WorkerId == workerId);
@@ -366,7 +369,7 @@ public class AppointmentService: IAppointmentService
             appointments = appointments
                 .Where(appointment => appointment.StartDateTime <= endDate);
         }
-
+        
         return appointments;
     }
     

@@ -36,7 +36,7 @@ namespace SmallClientBusiness.Controllers
         /// <returns></returns>
         [HttpGet("timezone")]
         [Authorize(Roles = AppRoles.Worker)]
-        public async Task<ActionResult<List<Appointment>>> GetAppointments(DateTime startDate, DateTime endDate)
+        public async Task<ActionResult<List<Appointment>>> GetAppointments(DateTime? startDate, DateTime? endDate)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null)
