@@ -137,7 +137,8 @@ public class AppointmentService: IAppointmentService
             .ThenInclude(s => s.Service);
         if (servicesId.Any())
         {
-            appointments = appointments.Where(a => a.AppointmentServices.All(s => servicesId.Contains(s.ServiceId)));
+            appointments = appointments.Where(a => a.AppointmentServices
+                .All(s => servicesId.Contains(s.ServiceId)));
         }
 
         return await appointments.Select(e => new Appointment

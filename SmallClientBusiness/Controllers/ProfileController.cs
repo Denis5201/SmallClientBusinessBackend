@@ -107,7 +107,7 @@ namespace SmallClientBusiness.Controllers
             }
             
             var path = _webHostEnvironment.WebRootPath + "/uploads/";
-            const string contentType = "image/png";
+            const string contentType = "image/jpeg";
 
             var imageBytes = await _profileService.LoadAvatar(new Guid(userId), path);
             

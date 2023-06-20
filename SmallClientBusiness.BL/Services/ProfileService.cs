@@ -90,10 +90,10 @@ namespace SmallClientBusiness.BL.Services
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
             
-            if (!avatarUpload.avatar.FileName.Contains(".png"))
-                throw new IncorrectDataException("Необходимо прикрепить фотографию расширения png");
+            if (!avatarUpload.avatar.FileName.Contains(".jpeg"))
+                throw new IncorrectDataException("Необходимо прикрепить фотографию расширения jpeg");
             
-            await using (var fileStream = File.Create(path + user.Id + ".png"))
+            await using (var fileStream = File.Create(path + user.Id + ".jpeg"))
             {
                 await avatarUpload.avatar.CopyToAsync(fileStream);
                 fileStream.Flush();
@@ -119,7 +119,7 @@ namespace SmallClientBusiness.BL.Services
             if (user.Avatar == false)
                 throw new ItemNotFoundException("У пользователя еще нет аватара");
             
-            var filePath = path + user.Id + ".png";
+            var filePath = path + user.Id + ".jpeg";
             
             if (!File.Exists(filePath))
             {
