@@ -9,8 +9,7 @@ public class EditAppointment
     public string ClientName { get; set; }
     
     [Phone]
-    [MaybeNull]
-    public string ClientPhone { get; set; }
+    public string? ClientPhone { get; set; }
     
     [Required]
     public DateTime StartDateTime { get; set; }

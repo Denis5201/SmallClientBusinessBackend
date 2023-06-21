@@ -11,7 +11,7 @@ public class CreateAppointment
     
     [Phone]
     [MaybeNull]
-    public string ClientPhone { get; set; }
+    public string? ClientPhone { get; set; }
     
     [Required]
     public DateTime StartDateTime { get; set; }
