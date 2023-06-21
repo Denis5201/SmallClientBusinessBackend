@@ -287,9 +287,6 @@ public class AppointmentService: IAppointmentService
             });
         }
         
-        appointment.AppointmentServices = await _context.AppointmentService
-            .Where(e => e.AppointmentId == appointment.Id)
-            .ToListAsync();
         appointment.EndDateTime = endDateTime;
         appointment.Price = priceAppointment;
 
