@@ -255,6 +255,7 @@ public class AppointmentService: IAppointmentService
 
         appointment.ClientName = model.ClientName;
         appointment.StartDateTime = model.StartDateTime;
+        appointment.ClientPhone = model.ClientPhone;
 
         var priceAppointment = new double();
         var endDateTime = appointment.StartDateTime;

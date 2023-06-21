@@ -8,7 +8,6 @@ public class EditAppointment
     [Required]
     public string ClientName { get; set; }
     
-    [Required]
     [Phone]
     [MaybeNull]
     public string ClientPhone { get; set; }
