@@ -76,7 +76,7 @@ namespace SmallClientBusiness.Controllers
         /// <returns></returns>
         [HttpPost("logout")]
         [Authorize]
-        public async Task<IActionResult> Logout()
+        public async Task<ActionResult<string>> Logout()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null)
@@ -84,7 +84,7 @@ namespace SmallClientBusiness.Controllers
                 return Forbid();
             }
             await _authService.Logout(userId);
-            return Ok();
+            return Ok("Success log out");
         }
     }
 }

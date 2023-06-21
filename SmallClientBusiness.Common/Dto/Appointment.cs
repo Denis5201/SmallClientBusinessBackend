@@ -9,6 +9,9 @@ public class Appointment
     
     [Required]
     public string ClientName { get; set; }
+    
+    [Phone]
+    public string? ClientPhone { get; set; }
 
     [Required]
     public List<ServiceShort> Services { get; set; }

@@ -107,6 +107,12 @@ public class ServiceService: IServiceService
         if (!worker.IsSubscribing)
             throw new NoPermissionException("Вы не можете создавать услугу, так как у вас отсутствует подписка");
 
+        var services = await _context.Services
+            .Where(a => (a.WorkerId == null || a.WorkerId == workerId) && a.Name == model.Name)
+            .ToListAsync();
+        if (services.Any())
+            throw new IncorrectDataException($"Услуга с названием '{model.Name}' уже существует");
+
         var service = new ServiceEntity
         {
             WorkerId = workerId,
@@ -136,6 +142,11 @@ public class ServiceService: IServiceService
         if (service.WorkerId != workerId)
             throw new NoPermissionException($"У вас нет доступа для изменения услуги с id = {serviceId}");
         
+        var services = await _context.Services
+            .Where(a => (a.WorkerId == null || a.WorkerId == workerId) && a.Name == model.Name)
+            .ToListAsync();
+        if (services.Any())
+            throw new IncorrectDataException($"Услуга с названием '{model.Name}' уже существует");
 
         service.Name = model.Name;
         service.Price = model.Price;

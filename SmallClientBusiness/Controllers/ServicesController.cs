@@ -109,7 +109,7 @@ namespace SmallClientBusiness.Controllers
         /// <returns></returns>
         [HttpPost("")]
         [Authorize(Roles = AppRoles.Worker)]
-        public async Task<IActionResult> CreateService(CreateService model)
+        public async Task<ActionResult<string>> CreateService(CreateService model)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null)
@@ -119,7 +119,7 @@ namespace SmallClientBusiness.Controllers
             
             await _serviceService.CreateService(new Guid(userId), model);
             
-            return Ok();
+            return Ok("Success created");
         }
         
         /// <summary>
@@ -130,7 +130,7 @@ namespace SmallClientBusiness.Controllers
         /// <returns></returns>
         [HttpPut("{serviceId:guid}")]
         [Authorize(Roles = AppRoles.Worker)]
-        public async Task<IActionResult> EditService(Guid serviceId, EditService model)
+        public async Task<ActionResult<string>> EditService(Guid serviceId, EditService model)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null)
@@ -140,7 +140,7 @@ namespace SmallClientBusiness.Controllers
             
             await _serviceService.EditService(new Guid(userId), serviceId, model);
             
-            return Ok();
+            return Ok("Success edited");
         }
         
         /// <summary>
@@ -150,7 +150,7 @@ namespace SmallClientBusiness.Controllers
         /// <returns></returns>
         [HttpDelete("{serviceId:guid}")]
         [Authorize(Roles = AppRoles.Worker)]
-        public async Task<IActionResult> DeleteService(Guid serviceId)
+        public async Task<ActionResult<string>> DeleteService(Guid serviceId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null)
@@ -160,7 +160,7 @@ namespace SmallClientBusiness.Controllers
             
             await _serviceService.DeleteService(new Guid(userId), serviceId);
             
-            return Ok();
+            return Ok("Success deleted");
         }
     }
 }

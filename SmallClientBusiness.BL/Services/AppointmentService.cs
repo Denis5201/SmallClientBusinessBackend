@@ -38,6 +38,7 @@ public class AppointmentService: IAppointmentService
             {
                 Id = e.Id,
                 ClientName = e.ClientName,
+                ClientPhone = e.ClientPhone,
                 Price = e.Price,
                 Services = e.AppointmentServices
                     .Select(s => new ServiceShort { Id = s.ServiceId, Name = s.Service.Name }).ToList(),
@@ -99,6 +100,7 @@ public class AppointmentService: IAppointmentService
             {
                 Id = e.Id,
                 ClientName = e.ClientName,
+                ClientPhone = e.ClientPhone,
                 Price = e.Price,
                 Services = e.AppointmentServices
                     .Select(s => new ServiceShort { Id = s.ServiceId, Name = s.Service.Name } ).ToList(),
@@ -137,13 +139,15 @@ public class AppointmentService: IAppointmentService
             .ThenInclude(s => s.Service);
         if (servicesId.Any())
         {
-            appointments = appointments.Where(a => a.AppointmentServices.All(s => servicesId.Contains(s.ServiceId)));
+            appointments = appointments.Where(a => a.AppointmentServices
+                .All(s => servicesId.Contains(s.ServiceId)));
         }
 
         return await appointments.Select(e => new Appointment
             {
                 Id = e.Id,
                 ClientName = e.ClientName,
+                ClientPhone = e.ClientPhone,
                 Price = e.Price,
                 Services = e.AppointmentServices
                     .Select(s => new ServiceShort { Id = s.ServiceId, Name = s.Service.Name }).ToList(),
@@ -170,6 +174,7 @@ public class AppointmentService: IAppointmentService
         {
             Id = appointment.Id,
             ClientName = appointment.ClientName,
+            ClientPhone = appointment.ClientPhone,
             Price = appointment.Price,
             Services = appointment.AppointmentServices
                 .Select(s => new ServiceShort { Id = s.ServiceId, Name = s.Service.Name }).ToList(),
@@ -181,10 +186,6 @@ public class AppointmentService: IAppointmentService
 
     public async Task CreateAppointment(Guid workerId, CreateAppointment model)
     {
-
-        if (model.StartDateTime < DateTime.UtcNow)
-            throw new IncorrectDataException("Дата начала новой записи должна быть больше нынешней");
-        
         var worker = await _context.Workers.FindAsync(workerId);
         if (worker == null)
             throw new ItemNotFoundException($"Не найден пользователь-работник с id = {workerId}");
@@ -203,7 +204,7 @@ public class AppointmentService: IAppointmentService
         };
         
         var priceAppointment = new double();
-        var endDateTime = appointment.StartDateTime;
+        var endDateTime = appointment.StartDateTime.ToUniversalTime();
         foreach (var serviceId in model.IdServices)
         {
             var service = await _context.Services.FindAsync(serviceId);
@@ -229,7 +230,7 @@ public class AppointmentService: IAppointmentService
 
         await CheckSameTimeAppointment(workerId, model.StartDateTime, endDateTime);
 
-        appointment.EndDateTime = endDateTime;
+        appointment.EndDateTime = endDateTime.ToUniversalTime();
         appointment.Price = priceAppointment;
 
         await _context.Appointments.AddAsync(appointment);
@@ -248,18 +249,25 @@ public class AppointmentService: IAppointmentService
         
         if (appointment.WorkerId != workerId)
             throw new NoPermissionException($"У вас нет доступа для изменения данной записи с id = {appointment.Id}");
-        
-        appointment = new AppointmentEntity
-        {
-            Id = appointment.Id,
-            ClientName = model.ClientName,
-            WorkerId = appointment.WorkerId,
-            StartDateTime = model.StartDateTime,
-            Worker = worker
-        };
-        
+
+        appointment.ClientName = model.ClientName;
+        appointment.StartDateTime = model.StartDateTime.ToUniversalTime();
+        appointment.ClientPhone = model.ClientPhone;
+
         var priceAppointment = new double();
-        var endDateTime = appointment.StartDateTime;
+        var endDateTime = appointment.StartDateTime.ToUniversalTime();
+
+        var currentServices = await _context.AppointmentService
+            .Where(e => e.AppointmentId == appointmentId)
+            .ToListAsync();
+
+        foreach (var currentService in currentServices)
+        {
+            _context.AppointmentService.Remove(currentService);
+        }
+        
+        await _context.SaveChangesAsync();
+        
         foreach (var serviceId in model.ServicesId)
         {
             var appointmentService = await _context.AppointmentService
@@ -289,10 +297,7 @@ public class AppointmentService: IAppointmentService
             });
         }
         
-        appointment.AppointmentServices = await _context.AppointmentService
-            .Where(e => e.AppointmentId == appointment.Id)
-            .ToListAsync();
-        appointment.EndDateTime = endDateTime;
+        appointment.EndDateTime = endDateTime.ToUniversalTime();
         appointment.Price = priceAppointment;
 
         _context.Appointments.Attach(appointment);
