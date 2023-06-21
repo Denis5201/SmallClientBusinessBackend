@@ -186,9 +186,6 @@ public class AppointmentService: IAppointmentService
 
     public async Task CreateAppointment(Guid workerId, CreateAppointment model)
     {
-        if (model.StartDateTime < DateTime.UtcNow)
-            throw new IncorrectDataException("Дата начала новой записи должна быть больше нынешней");
-        
         var worker = await _context.Workers.FindAsync(workerId);
         if (worker == null)
             throw new ItemNotFoundException($"Не найден пользователь-работник с id = {workerId}");
