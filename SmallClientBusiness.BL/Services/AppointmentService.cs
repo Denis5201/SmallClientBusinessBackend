@@ -252,16 +252,10 @@ public class AppointmentService: IAppointmentService
         
         if (appointment.WorkerId != workerId)
             throw new NoPermissionException($"У вас нет доступа для изменения данной записи с id = {appointment.Id}");
-        
-        appointment = new AppointmentEntity
-        {
-            Id = appointment.Id,
-            ClientName = model.ClientName,
-            WorkerId = appointment.WorkerId,
-            StartDateTime = model.StartDateTime,
-            Worker = worker
-        };
-        
+
+        appointment.ClientName = model.ClientName;
+        appointment.StartDateTime = model.StartDateTime;
+
         var priceAppointment = new double();
         var endDateTime = appointment.StartDateTime;
         foreach (var serviceId in model.ServicesId)
