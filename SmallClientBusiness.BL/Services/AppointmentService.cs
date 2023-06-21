@@ -258,6 +258,18 @@ public class AppointmentService: IAppointmentService
 
         var priceAppointment = new double();
         var endDateTime = appointment.StartDateTime.ToUniversalTime();
+
+        var currentServices = await _context.AppointmentService
+            .Where(e => e.AppointmentId == appointmentId)
+            .ToListAsync();
+
+        foreach (var currentService in currentServices)
+        {
+            _context.AppointmentService.Remove(currentService);
+        }
+        
+        await _context.SaveChangesAsync();
+        
         foreach (var serviceId in model.ServicesId)
         {
             var appointmentService = await _context.AppointmentService
