@@ -76,7 +76,7 @@ namespace SmallClientBusiness.Controllers
         /// <returns></returns>
         [HttpPut("password")]
         [Authorize(Roles = AppRoles.Worker)]
-        public async Task<ActionResult<string>> ChangePassword(ChangePassword changePassword)
+        public async Task<IActionResult> ChangePassword(ChangePassword changePassword)
         {
             if (!ModelState.IsValid)
             {
@@ -89,7 +89,7 @@ namespace SmallClientBusiness.Controllers
             }
 
             await _profileService.ChangePassword(userId, changePassword);
-            return Ok("Success changed password");
+            return Ok();
         }
 
         /// <summary>
