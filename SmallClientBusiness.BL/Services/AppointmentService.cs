@@ -38,6 +38,7 @@ public class AppointmentService: IAppointmentService
             {
                 Id = e.Id,
                 ClientName = e.ClientName,
+                ClientPhone = e.ClientPhone,
                 Price = e.Price,
                 Services = e.AppointmentServices
                     .Select(s => new ServiceShort { Id = s.ServiceId, Name = s.Service.Name }).ToList(),
