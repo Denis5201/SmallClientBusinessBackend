@@ -257,11 +257,27 @@ public class AppointmentService: IAppointmentService
         appointment.ClientPhone = model.ClientPhone;
 
         var priceAppointment = new double();
-        var endDateTime = appointment.StartDateTime;
+        var endDateTime = model.StartDateTime;
 
         var currentServices = await _context.AppointmentService
             .Where(e => e.AppointmentId == appointmentId)
             .ToListAsync();
+
+        var newEndDateTime = model.StartDateTime;
+
+        foreach (var serviceId in model.ServicesId)
+        {
+            var service = await _context.Services
+                .Where(e => e.Id == serviceId)
+                .FirstOrDefaultAsync();
+
+            if (service != null)
+            {
+                newEndDateTime += service.Duration.ToTimeSpan();
+            }
+        }
+
+        await CheckSameTimeAppointment(workerId, appointmentId, model.StartDateTime, newEndDateTime);
 
         foreach (var currentService in currentServices)
         {
@@ -298,8 +314,6 @@ public class AppointmentService: IAppointmentService
                 Service = service
             });
         }
-        
-        await CheckSameTimeAppointment(workerId, appointmentId, model.StartDateTime, endDateTime);
         
         appointment.EndDateTime = endDateTime;
         appointment.Price = priceAppointment;
