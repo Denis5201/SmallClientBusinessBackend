@@ -250,8 +250,10 @@ public class AppointmentService: IAppointmentService
         if (appointment.WorkerId != workerId)
             throw new NoPermissionException($"У вас нет доступа для изменения данной записи с id = {appointment.Id}");
 
+        model.StartDateTime = model.StartDateTime.ToUniversalTime();
+        
         appointment.ClientName = model.ClientName;
-        appointment.StartDateTime = model.StartDateTime.ToUniversalTime();
+        appointment.StartDateTime = model.StartDateTime;
         appointment.ClientPhone = model.ClientPhone;
 
         var priceAppointment = new double();
