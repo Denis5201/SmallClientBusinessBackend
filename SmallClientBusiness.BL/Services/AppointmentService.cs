@@ -255,7 +255,7 @@ public class AppointmentService: IAppointmentService
         appointment.ClientPhone = model.ClientPhone;
 
         var priceAppointment = new double();
-        var endDateTime = appointment.StartDateTime.ToUniversalTime();
+        var endDateTime = appointment.StartDateTime;
 
         var currentServices = await _context.AppointmentService
             .Where(e => e.AppointmentId == appointmentId)
@@ -299,7 +299,7 @@ public class AppointmentService: IAppointmentService
         
         await CheckSameTimeAppointment(workerId, model.StartDateTime, endDateTime);
         
-        appointment.EndDateTime = endDateTime.ToUniversalTime();
+        appointment.EndDateTime = endDateTime;
         appointment.Price = priceAppointment;
 
         _context.Appointments.Attach(appointment);
