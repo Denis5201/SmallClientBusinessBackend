@@ -228,7 +228,7 @@ public class AppointmentService: IAppointmentService
             });
         }
 
-        await CheckSameTimeAppointment(workerId, model.StartDateTime, endDateTime);
+        await CheckSameTimeAppointment(workerId,null, model.StartDateTime, endDateTime);
 
         appointment.EndDateTime = endDateTime;
         appointment.Price = priceAppointment;
@@ -299,7 +299,7 @@ public class AppointmentService: IAppointmentService
             });
         }
         
-        await CheckSameTimeAppointment(workerId, model.StartDateTime, endDateTime);
+        await CheckSameTimeAppointment(workerId, appointmentId, model.StartDateTime, endDateTime);
         
         appointment.EndDateTime = endDateTime;
         appointment.Price = priceAppointment;
@@ -400,10 +400,11 @@ public class AppointmentService: IAppointmentService
         return appointments;
     }
 
-    private async Task CheckSameTimeAppointment(Guid workerId, DateTime newAppointmentStartDateTime, DateTime newAppointmentEndDateTime)
+    private async Task CheckSameTimeAppointment(Guid workerId, Guid? appointmentId, DateTime newAppointmentStartDateTime, DateTime newAppointmentEndDateTime)
     {
         var appointments = await _context.Appointments
             .Where(a => a.WorkerId == workerId && 
+                        a.Id != appointmentId && 
                         newAppointmentStartDateTime < a.EndDateTime && 
                         newAppointmentEndDateTime > a.StartDateTime)
             .ToListAsync();
