@@ -204,7 +204,7 @@ public class AppointmentService: IAppointmentService
         };
         
         var priceAppointment = new double();
-        var endDateTime = appointment.StartDateTime.ToUniversalTime();
+        var endDateTime = appointment.StartDateTime;
         foreach (var serviceId in model.IdServices)
         {
             var service = await _context.Services.FindAsync(serviceId);
@@ -230,7 +230,7 @@ public class AppointmentService: IAppointmentService
 
         await CheckSameTimeAppointment(workerId, model.StartDateTime, endDateTime);
 
-        appointment.EndDateTime = endDateTime.ToUniversalTime();
+        appointment.EndDateTime = endDateTime;
         appointment.Price = priceAppointment;
 
         await _context.Appointments.AddAsync(appointment);
@@ -296,6 +296,8 @@ public class AppointmentService: IAppointmentService
                 Service = service
             });
         }
+        
+        await CheckSameTimeAppointment(workerId, model.StartDateTime, endDateTime);
         
         appointment.EndDateTime = endDateTime.ToUniversalTime();
         appointment.Price = priceAppointment;
