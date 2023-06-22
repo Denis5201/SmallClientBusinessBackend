@@ -204,7 +204,7 @@ public class AppointmentService: IAppointmentService
         };
         
         var priceAppointment = new double();
-        var endDateTime = appointment.StartDateTime.ToUniversalTime();
+        var endDateTime = appointment.StartDateTime;
         foreach (var serviceId in model.IdServices)
         {
             var service = await _context.Services.FindAsync(serviceId);
@@ -228,9 +228,9 @@ public class AppointmentService: IAppointmentService
             });
         }
 
-        await CheckSameTimeAppointment(workerId, model.StartDateTime, endDateTime);
+        await CheckSameTimeAppointment(workerId,null, model.StartDateTime, endDateTime);
 
-        appointment.EndDateTime = endDateTime.ToUniversalTime();
+        appointment.EndDateTime = endDateTime;
         appointment.Price = priceAppointment;
 
         await _context.Appointments.AddAsync(appointment);
@@ -250,16 +250,34 @@ public class AppointmentService: IAppointmentService
         if (appointment.WorkerId != workerId)
             throw new NoPermissionException($"У вас нет доступа для изменения данной записи с id = {appointment.Id}");
 
+        model.StartDateTime = model.StartDateTime.ToUniversalTime();
+        
         appointment.ClientName = model.ClientName;
-        appointment.StartDateTime = model.StartDateTime.ToUniversalTime();
+        appointment.StartDateTime = model.StartDateTime;
         appointment.ClientPhone = model.ClientPhone;
 
         var priceAppointment = new double();
-        var endDateTime = appointment.StartDateTime.ToUniversalTime();
+        var endDateTime = model.StartDateTime;
 
         var currentServices = await _context.AppointmentService
             .Where(e => e.AppointmentId == appointmentId)
             .ToListAsync();
+
+        var newEndDateTime = model.StartDateTime;
+
+        foreach (var serviceId in model.ServicesId)
+        {
+            var service = await _context.Services
+                .Where(e => e.Id == serviceId)
+                .FirstOrDefaultAsync();
+
+            if (service != null)
+            {
+                newEndDateTime += service.Duration.ToTimeSpan();
+            }
+        }
+
+        await CheckSameTimeAppointment(workerId, appointmentId, model.StartDateTime, newEndDateTime);
 
         foreach (var currentService in currentServices)
         {
@@ -297,7 +315,7 @@ public class AppointmentService: IAppointmentService
             });
         }
         
-        appointment.EndDateTime = endDateTime.ToUniversalTime();
+        appointment.EndDateTime = endDateTime;
         appointment.Price = priceAppointment;
 
         _context.Appointments.Attach(appointment);
@@ -396,10 +414,11 @@ public class AppointmentService: IAppointmentService
         return appointments;
     }
 
-    private async Task CheckSameTimeAppointment(Guid workerId, DateTime newAppointmentStartDateTime, DateTime newAppointmentEndDateTime)
+    private async Task CheckSameTimeAppointment(Guid workerId, Guid? appointmentId, DateTime newAppointmentStartDateTime, DateTime newAppointmentEndDateTime)
     {
         var appointments = await _context.Appointments
             .Where(a => a.WorkerId == workerId && 
+                        a.Id != appointmentId && 
                         newAppointmentStartDateTime < a.EndDateTime && 
                         newAppointmentEndDateTime > a.StartDateTime)
             .ToListAsync();
